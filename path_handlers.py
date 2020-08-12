@@ -1,6 +1,6 @@
 import json
 
-ERROR = json.dumps({'code': "404", 'message': "NOT OK"})
+ERROR = json.dumps({'code': "503", 'message': "NOT OK"})
 SUCCESS = json.dumps({'code': "200", 'message': "OK"})
 
 
