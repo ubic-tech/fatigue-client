@@ -1,10 +1,13 @@
-class Driver:
-    def __init__(self, name, license_id):
-        self.fatigue = False
-        self.name = name
-        self.license_id = license_id
-        self.last_hour = True
-        self.last_quarters = [True, True, True, True]
+from driver import Driver
+drivers_base = [
+    Driver("Rogue", 101),
+    Driver("Tough", 202),
+    Driver("Harsh", 303),
+    Driver("Rough", 404),
+    Driver("Rigid", 505),
+]
 
-    def set_fatigue(self, val):
-        self.fatigue = val
+DRIVERS = {v.get_id(): v for v in drivers_base}
+
+if __name__ == "__main__":
+    print(DRIVERS)
