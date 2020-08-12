@@ -3,8 +3,8 @@ class Driver:
         self.fatigue = False
         self.full_name = full_name
         self.license_id = license_id
-        self.last_hour = True
-        self.last_quarters = [True, True, True, True]
+        self.last_hour = False
+        self.last_quarters = [False, False, False, False]
 
     def set_fatigue(self, val):
         self.fatigue = val
@@ -13,7 +13,7 @@ class Driver:
         self.last_hour = val
 
     def set_last_quarters(self, values):
-        self.last_quarters = [val for val in values]
+        self.last_quarters = [val for val in values[:4]]
 
     def get_fatigue(self):
         return self.fatigue
