@@ -5,3 +5,11 @@ AGGREGATORS_DATA = [
     ("Fast", 77077, 8081),
     ("Comfort", 9000, 8082),
 ]
+
+DRIVERS_DATA = [
+    ("Rogue", 101),
+    ("Tough", 202),
+    ("Harsh", 303),
+    ("Rough", 404),
+    ("Rigid", 505),
+]

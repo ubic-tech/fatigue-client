@@ -1,10 +1,7 @@
 from driver import Driver
+from config import DRIVERS_DATA
 drivers_base = [
-    Driver("Rogue", 101),
-    Driver("Tough", 202),
-    Driver("Harsh", 303),
-    Driver("Rough", 404),
-    Driver("Rigid", 505),
+    Driver(name, license_id) for name, license_id in DRIVERS_DATA
 ]
 
 DRIVERS = {v.get_id(): v for v in drivers_base}
