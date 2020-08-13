@@ -13,24 +13,6 @@ class Aggregator:
     def add_driver(self, full_name, license_id):
         self.drivers.add_driver(full_name, license_id)
 
-    def set_fatigue(self, driver_id, val):
-        self.drivers.set_fatigue(driver_id, val)
-
-    def set_last_hour(self, driver_id, val):
-        self.drivers.set_last_hour(driver_id, val)
-
-    def set_last_quarters(self, driver_id, values):
-        self.drivers.set_last_quarters(driver_id, values)
-
-    def get_fatigue(self, driver_id):
-        return self.drivers.get_fatigue(driver_id)
-
-    def get_last_hour(self, driver_id):
-        return self.drivers.get_last_hour(driver_id)
-
-    def get_last_quarters(self, driver_id):
-        return self.drivers.get_last_quarters(driver_id)
-
     def run(self):
         handler = HandleRequests
         try:
