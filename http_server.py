@@ -1,6 +1,4 @@
 import http.server
-import socketserver
-from config import PORT
 from path_handlers import *
 PATH_MAP = {
     "/v1/health": v1_health,
@@ -36,13 +34,3 @@ class HandleRequests(http.server.BaseHTTPRequestHandler):
 
     def do_PUT(self):
         self.do_POST()
-
-
-def http_server_run():
-    handler = HandleRequests
-    try:
-        with socketserver.TCPServer(("", PORT), handler) as httpd:
-            print("serving at port", PORT)
-            httpd.serve_forever()
-    except KeyboardInterrupt:
-        httpd.server_close()
