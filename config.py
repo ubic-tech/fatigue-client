@@ -1,4 +1,3 @@
-
 AGGREGATORS_DATA = [
     # name, id, port
     ("Safe", 100501, 8080),
