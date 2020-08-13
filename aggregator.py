@@ -1,6 +1,7 @@
 from http_server import HandleRequests
 import socketserver
 from driver import DriversDB
+from functools import partial
 
 
 class Aggregator:
@@ -14,7 +15,7 @@ class Aggregator:
         self.drivers.add_driver(full_name, license_id)
 
     def run(self):
-        handler = HandleRequests
+        handler = partial(HandleRequests, self)  # using partial to forward our aggregator
         try:
             with socketserver.TCPServer(("", self.port), handler) as httpd:
                 print(f"{self.name} (id {self.id}) serving at port {self.port}")

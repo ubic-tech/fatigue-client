@@ -10,6 +10,15 @@ PATH_MAP = {
 
 
 class HandleRequests(http.server.BaseHTTPRequestHandler):
+    def __init__(self, aggregator, *args, **kwargs):
+        # BaseHTTPRequestHandler calls do_GET **inside** __init__
+        # So we have to call super().__init__ after setting attributes.
+        self.aggregator = aggregator
+        super(HandleRequests, self).__init__(*args, **kwargs)
+
+    def set_aggregator(self, aggregator):
+        self.aggregator = aggregator
+
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -25,10 +34,12 @@ class HandleRequests(http.server.BaseHTTPRequestHandler):
         return handler(self.headers, body)
 
     def do_GET(self):
+        print(self.aggregator.drivers.drivers_database)
         self._set_headers()
         self.wfile.write(self._get_response().encode())
 
     def do_POST(self):
+        print(self.aggregator.drivers.drivers_database)
         self._set_headers()
         self.wfile.write(self._get_response().encode())
 
