@@ -1,5 +1,6 @@
 from http_server import HandleRequests
 import socketserver
+from driver import DriversDB
 
 
 class Aggregator:
@@ -7,29 +8,28 @@ class Aggregator:
         self.name = name
         self.id = _id
         self.port = port
-        self.drivers = {}
+        self.drivers = DriversDB()  # emulates connection to drivers data base
 
-    def add_driver(self, driver):
-        k, v = driver
-        self.drivers[k] = v
+    def add_driver(self, full_name, license_id):
+        self.drivers.add_driver(full_name, license_id)
 
     def set_fatigue(self, driver_id, val):
-        self.drivers[driver_id] = val
+        self.drivers.set_fatigue(driver_id, val)
 
     def set_last_hour(self, driver_id, val):
-        self.drivers[driver_id] = val
+        self.drivers.set_last_hour(driver_id, val)
 
     def set_last_quarters(self, driver_id, values):
-        self.drivers[driver_id] = [val for val in values[:4]]
+        self.drivers.set_last_quarters(driver_id, values)
 
-    def get_fatigue(self, driver_id,):
-        return self.drivers[driver_id].fatigue
+    def get_fatigue(self, driver_id):
+        return self.drivers.get_fatigue(driver_id)
 
-    def get_last_hour(self, driver_id,):
-        return self.drivers[driver_id].last_hour
+    def get_last_hour(self, driver_id):
+        return self.drivers.get_last_hour(driver_id)
 
-    def get_last_quarters(self, driver_id,):
-        return self.drivers[driver_id].last_quarters
+    def get_last_quarters(self, driver_id):
+        return self.drivers.get_last_quarters(driver_id)
 
     def run(self):
         handler = HandleRequests
