@@ -6,6 +6,7 @@ AGGREGATORS_DATA = [
 ]
 
 DRIVERS_DATA = [
+    # name, license id
     ("Rogue", 101),
     ("Tough", 202),
     ("Harsh", 303),
