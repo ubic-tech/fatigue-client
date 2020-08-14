@@ -15,7 +15,9 @@ class Aggregator:
         self.drivers.add_driver(full_name, license_id)
 
     def run(self):
-        handler = partial(HandleRequests, self)  # using partial to forward our aggregator
+        # using partial to forward our aggregator
+        # passing self by ref using a list
+        handler = partial(HandleRequests, [self, ])
         try:
             with socketserver.TCPServer(("", self.port), handler) as httpd:
                 print(f"{self.name} (id {self.id}) serving at port {self.port}")

@@ -13,7 +13,8 @@ class HandleRequests(http.server.BaseHTTPRequestHandler):
     def __init__(self, aggregator, *args, **kwargs):
         # BaseHTTPRequestHandler calls do_GET **inside** __init__
         # So we have to call super().__init__ after setting attributes.
-        self.aggregator = aggregator
+        # passing aggregator as a list with one entity to have it by ref
+        self.aggregator = aggregator[0]
         super(HandleRequests, self).__init__(*args, **kwargs)
 
     def set_aggregator(self, aggregator):
