@@ -1,9 +1,11 @@
 class Driver:
     """simple data structure to keep driver's data"""
     def __init__(self, full_name, license_id):
-        self.fatigue = False
+        # private data
         self.full_name = full_name
         self.license_id = license_id
+        # business data
+        self.fatigue = False
         self.last_hour = False
         self.last_quarters = [False, False, False, False]
 
@@ -19,10 +21,11 @@ class Driver:
 
 
 class DriversDB:
-    """
-    emulates data base of drivers
-    provides interface to set/get fields of Driver data structure
-    """
+    """ emulates data base of drivers
+    provides interface to set/get fields of Driver data
+    adders emulate insert op
+    setters emulate update op
+    getters emulate select op """
     def __init__(self):
         self.drivers_database = {}
 
