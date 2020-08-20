@@ -1,2 +1,0 @@
-curl --header "Content-Type: application/json" --request GET http://127.0.0.1:8080/v1/health
-curl -X POST "http://127.0.0.1:8080/v1/drivers/fatigue" -H  "accept: application/json" -H  "X-Authorization: xauth" -H  "X-Request-Id: xreq" -H  "Content-Type: application/json" -d "{\"timestamp\":\"2020-08-11T16:30:25.199Z\",\"drivers\":[{\"hash_id\":\"driver1\",\"online\":0,\"on_order\":0},{\"hash_id\":\"driver2\",\"online\":0,\"on_order\":0}]}"
