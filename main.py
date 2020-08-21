@@ -1,6 +1,6 @@
 # Press Shift+F10 to execute it or replace it with your code.
 from fastapi import FastAPI
-from rest_models import DriversFatigue
+from rest_models import DriversFatigue, DriversOnlineHourlyRequest
 from config import SUCCESS, ERROR, DRIVERS_DATA
 from aggregator import Aggregator
 #  uvicorn main:app  --port 8080
@@ -64,7 +64,8 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 
 
 @app.post("/v1/drivers/online/hourly")
-def v1_drivers_online_hourly():
+def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest):
+    print(request)
     return SUCCESS
 
 
