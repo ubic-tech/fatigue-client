@@ -1,5 +1,5 @@
 from requests import get, post
-from curl_data import *
+from tests.curl_data import *
 from json import dumps
 
 url = " http://127.0.0.1:8080"
