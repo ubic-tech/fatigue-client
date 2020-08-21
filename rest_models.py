@@ -20,6 +20,10 @@ class DriversOnlineQuarterHourlyRequest(DriversOnlineHourlyRequest):
     pass
 
 
+class DriversOnOrderRequest(DriversOnlineHourlyRequest):
+    pass
+
+
 class DriverFatigue(BaseModel):
     hash_id: str
     online: int

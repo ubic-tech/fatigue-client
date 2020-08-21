@@ -4,6 +4,7 @@ from rest_models import (
     DriversFatigue,
     DriversOnlineHourlyRequest,
     DriversOnlineQuarterHourlyRequest,
+    DriversOnOrderRequest,
 )
 from config import SUCCESS, ERROR, DRIVERS_DATA
 from aggregator import Aggregator
@@ -81,5 +82,6 @@ def v1_drivers_online_quarter_hourly(
 
 
 @app.post("/v1/drivers/on_order")
-def v1_drivers_on_order():
+def v1_drivers_on_order(request: DriversOnOrderRequest):
+    print(request)
     return SUCCESS

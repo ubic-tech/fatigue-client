@@ -61,3 +61,24 @@ drivers_online_quarter_hourly_request_data = {
         "9000xxx_chain",
     ],
 }
+
+drivers_on_order_data = {
+    "timestamp": "2020-08-11T16:30:25.199Z",
+    "drivers": [
+        {
+            "hash_id": "Tough202",
+            "shares": [
+                0
+            ]
+        },
+        {
+            "hash_id": "Rough505",
+            "shares": [
+                1
+            ]
+        },
+    ],
+    "chain": [
+        "115200xxx_chain",
+    ],
+}

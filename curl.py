@@ -33,9 +33,16 @@ def test_drivers_online_quarter_hourly():
     print(r.json())
 
 
+def test_drivers_on_order():
+    r = post(url + "/v1/drivers/on_order",
+             headers=headers,
+             data=dumps(drivers_on_order_data))
+    print(r.json())
+
+
 if __name__ == "__main__":
     test_v1_health()
     test_drivers_fatigue()
     test_drivers_online_hour()
     test_drivers_online_quarter_hourly()
-
+    test_drivers_on_order()
