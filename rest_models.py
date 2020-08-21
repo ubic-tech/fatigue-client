@@ -16,6 +16,10 @@ class DriversOnlineHourlyRequest(DriversRequest):
     drivers: List[DriverData]
 
 
+class DriversOnlineQuarterHourlyRequest(DriversOnlineHourlyRequest):
+    pass
+
+
 class DriverFatigue(BaseModel):
     hash_id: str
     online: int

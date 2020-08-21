@@ -19,14 +19,23 @@ def test_drivers_fatigue():
     print(r.json())
 
 
-def test_drivers_online():
+def test_drivers_online_hour():
     r = post(url + "/v1/drivers/online/hourly",
              headers=headers,
              data=dumps(drivers_online_hourly_request_data))
     print(r.json())
 
 
+def test_drivers_online_quarter_hourly():
+    r = post(url + "/v1/drivers/online/quarter_hourly",
+             headers=headers,
+             data=dumps(drivers_online_quarter_hourly_request_data))
+    print(r.json())
+
+
 if __name__ == "__main__":
     test_v1_health()
     test_drivers_fatigue()
-    test_drivers_online()
+    test_drivers_online_hour()
+    test_drivers_online_quarter_hourly()
+
