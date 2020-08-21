@@ -9,7 +9,7 @@ class DriverData(BaseModel):
 
 class DriversRequest(BaseModel):
     timestamp: str
-    chain: str
+    chain: List[str]
 
 
 class DriversOnlineHourlyRequest(DriversRequest):

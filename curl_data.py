@@ -35,6 +35,8 @@ drivers_online_hourly_request_data = {
                 1
             ]
         },
-
-    ]
+    ],
+    "chain": [
+        "1357xxx_chain",
+    ],
 }
