@@ -38,6 +38,6 @@ class Aggregator(FastAPI):
         self.drivers.add_driver(full_name, license_id)
 
     @staticmethod
-    async def v1_health(x_authorization: str = Header(...)):
-        print(x_authorization)
+    async def v1_health(self, x_authorization: str = Header(...)):
+        # print(self.id, x_authorization)
         return SUCCESS
