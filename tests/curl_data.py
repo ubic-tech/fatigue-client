@@ -1,3 +1,5 @@
+"""как получить юрлы по хэшам в цепочках?"""
+
 headers = {
     "X-Authorization": "xauth",
     "X-Request-Id": "xreq",
@@ -37,7 +39,7 @@ drivers_online_hourly_request_data = {
         },
     ],
     "chain": [
-        "100500xxx_chain",
+        "9600",
     ],
 }
 
@@ -58,7 +60,7 @@ drivers_online_quarter_hourly_request_data = {
         },
     ],
     "chain": [
-        "9000xxx_chain",
+        "9600",
     ],
 }
 
@@ -79,6 +81,6 @@ drivers_on_order_data = {
         },
     ],
     "chain": [
-        "115200xxx_chain",
+        "9600",
     ],
 }
