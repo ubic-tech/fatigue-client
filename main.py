@@ -6,20 +6,29 @@ from rest_models import (
     DriversOnlineQuarterHourlyRequest,
     DriversOnOrderRequest,
 )
-from config import SUCCESS, ERROR, DRIVERS_DATA
+from config import SUCCESS, ERROR, DRIVERS_DATA,AGGREGATORS_DATA
 from aggregator import Aggregator
-#  uvicorn main:app  --port 8080
+from logger.logger import log
 
-app = FastAPI()
-aggregator = Aggregator("Fast", 100500)
-for driver in DRIVERS_DATA:
-    name, license_id = driver
-    aggregator.add_driver(name, license_id)
 
 """
 как забрать все хедеры в Auth
 как использовать декоратор для валидации
 """
+#  uvicorn main:app  --port 8080
+
+app = FastAPI()
+aggregator = Aggregator("Fast", 100500)
+
+
+def init():
+    for driver in DRIVERS_DATA:
+        name, license_id = driver
+        aggregator.add_driver(name, license_id)
+
+    for hash_id, url in AGGREGATORS_DATA.items():
+        aggregator.add_aggregator(hash_id, url)
+    log(aggregator.name, " inited")
 
 
 def _validate_put_request(handler):
@@ -70,7 +79,7 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 
 @app.post("/v1/drivers/online/hourly")
 def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest):
-    print(request)
+
     return SUCCESS
 
 
@@ -85,3 +94,6 @@ def v1_drivers_online_quarter_hourly(
 def v1_drivers_on_order(request: DriversOnOrderRequest):
     print(request)
     return SUCCESS
+
+
+init()

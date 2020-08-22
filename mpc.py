@@ -1,6 +1,12 @@
 from random import randint, seed
 from datetime import datetime
-LAST_INDEX = -1
+
+
+def get_rand_pair(base: int) -> (int, int):
+    seed(datetime.now().microsecond)
+    f = randint(1000, 2000)
+    s = base - f
+    return (f, s) if randint(0, 1) else (s, f)
 
 
 class Ubic(object):
@@ -15,7 +21,10 @@ class Ubic(object):
         return self._sum
 
 
-class Mpc:
+LAST_INDEX = -1
+
+
+class ProtoMpc:
     def __init__(self, value, _ubic):
         self._value = value
         self._ubic = _ubic
@@ -40,7 +49,7 @@ class Mpc:
 
 if __name__ == '__main__':
     ubic = [Ubic(), ]
-    aggr = [Mpc(10, ubic), Mpc(0, ubic), Mpc(21, ubic), ]
+    aggr = [ProtoMpc(10, ubic), ProtoMpc(0, ubic), ProtoMpc(21, ubic), ]
     aggr_len = len(aggr)
     part = 0
 
