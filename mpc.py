@@ -1,5 +1,7 @@
 from random import randint, seed
 from datetime import datetime
+from utils import *
+from rest_models import DriverData
 
 
 def get_rand_pair(base: int) -> (int, int):
@@ -9,54 +11,42 @@ def get_rand_pair(base: int) -> (int, int):
     return (f, s) if randint(0, 1) else (s, f)
 
 
-class Ubic(object):
-    def __init__(self):
-        super(Ubic, self).__init__()
-        self._sum = 0
+def mpc_strategy(headers, request, route, aggregator, data_extractor):
+    try:
+        self_index = request.chain.index(aggregator.id)  # get index of aggr in chain
+    except ValueError:
+        return ERROR
 
-    def add(self, _part):
-        self._sum += _part
+    try:
+        next_aggr_hash_id = request.chain[self_index + 1]
+        next_aggr_url = get_endpoint_url_by_hash(next_aggr_hash_id,
+                                                 headers["X-Authorization"])
+    except IndexError:  # means this is the last aggregator in the chain
+        for i, driver in enumerate(request.drivers):
+            driver_data = data_extractor(driver.hash_id, request.timestamp)
+            for j, d in enumerate(driver_data):
+                request.drivers[i].shares[j] += d
+        r = send(UBIC_URL + V1_SHARES, headers, data=dumps(request))  # simply send ubic our share summed with total
+        if r is None:
+            pass
+        return SUCCESS
 
-    def get_sum(self):
-        return self._sum
+    ubic_shares = []
+    for i, driver in enumerate(request.drivers):
+        ubic_part = DriverData()
+        ubic_part.hash_id = driver.hash_id
+        raw_driver_data = data_extractor(driver.hash_id, request.timestamp)
+        for j, d in enumerate(raw_driver_data):
+            for_ubic, for_common = get_rand_pair(int(d))
+            request.drivers[i].shares[j] += for_common
+            ubic_part.shares.append(for_ubic)
+        ubic_shares.append(ubic_part)
 
+    r = send(UBIC_URL + V1_SHARES, headers, data=dumps(ubic_shares))
+    if r is None:  # handle errors
+        return ERROR
 
-LAST_INDEX = -1
-
-
-class ProtoMpc:
-    def __init__(self, value, _ubic):
-        self._value = value
-        self._ubic = _ubic
-
-    def value(self):
-        return self._value
-
-    def _get_rand_pair(self):
-        seed(datetime.now().microsecond)
-        f = randint(1000, 2000)
-        s = self.value() - f
-        return (f, s) if randint(0, 1) else (s, f)
-
-    def process(self, index, _part):
-        if index == LAST_INDEX:
-            return _part + self.value()
-
-        f, s = self._get_rand_pair()
-        self._ubic[0].add(f)
-        return part + s
-
-
-if __name__ == '__main__':
-    ubic = [Ubic(), ]
-    aggr = [ProtoMpc(10, ubic), ProtoMpc(0, ubic), ProtoMpc(21, ubic), ]
-    aggr_len = len(aggr)
-    part = 0
-
-    for i, agr in enumerate(aggr):
-        if i == aggr_len - 1:
-            part = agr.process(LAST_INDEX, part)
-        else:
-            part = agr.process(i, part)
-    res = abs(part) - abs(ubic[0].get_sum())
-    print(part, ", ", ubic[0].get_sum(), "\tres = ", abs(res))
+    r = send(next_aggr_url + route, headers=headers, data=dumps(request))
+    if r is None:  # handle errors
+        return ERROR
+    return SUCCESS

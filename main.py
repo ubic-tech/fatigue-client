@@ -1,17 +1,10 @@
 # Press Shift+F10 to execute it or replace it with your code.
 from fastapi import FastAPI, Header
+from config import *
 from rest_models import *
 from aggregator import Aggregator
 from logger.logger import log
-from mpc import get_rand_pair
-from utils import *
-from json import dumps, JSONEncoder
-from collections import namedtuple
-
-"""
-как забрать все хедеры в Auth
-как использовать декоратор для валидации
-"""
+from mpc import mpc_strategy
 #  uvicorn main:app  --port 8080
 
 app = FastAPI()
@@ -78,46 +71,12 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
     """как парсить json в кастомный объект"""
     data_extractor = aggregator.drivers_db.get_online_hour
     route = "/v1/drivers/online/hourly"
-    try:
-        self_index = request.chain.index(aggregator.id)  # get index of aggr in chain
-    except ValueError:
-        return ERROR
 
     headers = {
         "X-Authorization": x_authorization,
         "X-Request-Id": x_request_id,
     }
-
-    try:
-        next_aggr_hash_id = request.chain[self_index + 1]
-        next_aggr_url = get_endpoint_url_by_hash(next_aggr_hash_id, x_authorization)
-    except IndexError:  # means this is the last aggregator in the chain
-        for i, driver in enumerate(request.drivers):
-            driver_data = data_extractor(driver.hash_id, request.timestamp)
-            request.drivers[i].shares[0] += driver_data   # simply send ubic our share summed with total
-        r = send(UBIC_URL + V1_SHARES, headers, data=dumps(request))
-        if r is None:
-            pass
-        return SUCCESS
-
-    ubic_shares = []
-    for i, driver in enumerate(request.drivers):
-        driver_data = data_extractor(driver.hash_id, request.timestamp)
-        ubic_share, common_share = get_rand_pair(int(driver_data))
-        request.drivers[i].shares[0] += common_share  # only one share is expected for each driver
-        dd = DriverData()
-        dd.hash_id = driver.hash_id
-        dd.shares = [ubic_share, ]
-        ubic_shares.append(dd)
-
-    r = send(UBIC_URL + V1_SHARES, headers, data=dumps(ubic_shares))
-    if r is None:  # handle errors
-        return ERROR
-
-    r = send(next_aggr_url + route, headers=headers, data=dumps(request))
-    if r is None:  # handle errors
-        return ERROR
-    return SUCCESS
+    return mpc_strategy(headers, request, route, aggregator, data_extractor)
 
 
 @app.post("/v1/drivers/online/quarter_hourly")
