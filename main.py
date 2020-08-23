@@ -1,15 +1,13 @@
 # Press Shift+F10 to execute it or replace it with your code.
-from fastapi import FastAPI
-from rest_models import (
-    DriversFatigue,
-    DriversOnlineHourlyRequest,
-    DriversOnlineQuarterHourlyRequest,
-    DriversOnOrderRequest,
-)
-from config import SUCCESS, ERROR, DRIVERS_DATA,AGGREGATORS_DATA
+from fastapi import FastAPI, Header
+from typing import Optional
+from rest_models import *
+from config import *
 from aggregator import Aggregator
 from logger.logger import log
-
+from mpc import get_rand_pair
+from sender import send
+from json import dumps
 
 """
 как забрать все хедеры в Auth
@@ -78,8 +76,46 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 
 
 @app.post("/v1/drivers/online/hourly")
-def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest):
+def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
+                             x_authorization: str = Header(...),
+                             x_request_id: str = Header(...)):
+    try:
+        self_index = request.chain.index(aggregator.id)  # get index of aggr in chain
+    except ValueError:
+        return ERROR
 
+    headers = {
+        "X-Authorization": x_authorization,
+        "X-Request-Id": x_request_id,
+    }
+
+    try:
+        next_aggr_hash_id = request.chain[self_index + 1]
+        next_aggr_url = aggregator.aggregators[next_aggr_hash_id]
+    except IndexError:  # means this is the last aggregator in the chain
+        for i, driver in enumerate(request.drivers):
+            driver_data = aggregator.drivers_db.get_online_hour(driver.hash_id, request.timestamp)
+            request.drivers[i].shares[0] += driver_data   # simply send ubic our share
+
+    ubic_shares = []
+    for i, driver in enumerate(request.drivers):
+        driver_data = aggregator.drivers_db.get_online_hour(driver.hash_id, request.timestamp)
+        ubic_share, common_share = get_rand_pair(int(driver_data))
+        request.drivers[i].shares[0] += common_share  # only one share is expected for each driver
+        dd = DriverData()
+        dd.hash_id = driver.hash_id
+        dd.shares = [ubic_share, ]
+        ubic_shares.append(dd)
+
+    r = send(UBIC_URL + V1_SHARES, headers, data=dumps(ubic_shares))
+    if r is None:  # handle errors
+        return ERROR
+
+    r = send(next_aggr_url + "/v1/drivers/online/hourly",  # todo: replace the route with var
+             headers=headers,
+             data=dumps(request))
+    if r is None:  # handle errors
+        return ERROR
     return SUCCESS
 
 
