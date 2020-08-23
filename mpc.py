@@ -20,7 +20,7 @@ def mpc_strategy(headers, request, route, aggregator, data_extractor):
     try:  # trying find next aggr in chain
         next_aggr_hash_id = request.chain[self_index + 1]
     except IndexError:  # means 'me' is the last aggregator in the chain
-        for i, driver in enumerate(request.drivers):  # sum up 'my' shares to received ones
+        for i, driver in enumerate(request.drivers):  # sum up 'my' shares with received ones
             driver_data = data_extractor(driver.hash_id, request.timestamp)
             for j, d in enumerate(driver_data):  # 1 or 4 values in list are expected
                 request.drivers[i].shares[j] += d
@@ -35,7 +35,7 @@ def mpc_strategy(headers, request, route, aggregator, data_extractor):
     for i, driver in enumerate(request.drivers):
         ubic_driver_shares = DriverData()  # to be appended to ubic_drivers_shares
         ubic_driver_shares.hash_id = driver.hash_id
-        raw_driver_data = data_extractor(driver.hash_id, request.timestamp)  # value from driversDB: [sh, ...]
+        raw_driver_data = data_extractor(driver.hash_id, request.timestamp)  # value from driversDB: [share, ...]
         for j, d in enumerate(raw_driver_data):
             for_ubic, for_common = get_rand_pair(int(d))  # for_ubic + for_common == d
             request.drivers[i].shares[j] += for_common  # add 'my' share summed up with common
