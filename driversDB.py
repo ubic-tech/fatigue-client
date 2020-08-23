@@ -45,8 +45,8 @@ class DriversDB:
     def get_fatigue(self, driver_id):
         return self.drivers_database[driver_id].fatigue
 
-    def get_last_hour(self, driver_id):
+    def get_online_hour(self, driver_id, timestamp):
         return self.drivers_database[driver_id].last_hour
 
-    def get_last_quarters(self, driver_id):
+    def get_online_quarters(self, driver_id, timestamp):
         return self.drivers_database[driver_id].last_quarters
