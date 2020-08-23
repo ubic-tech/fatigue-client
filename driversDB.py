@@ -8,6 +8,7 @@ class Driver:
         self.fatigue = False
         self.last_hour = False
         self.last_quarters = [False, False, False, False]
+        self.on_order = False
 
     def get_id(self):
         """emulates a hash function to get uuid for each driver
@@ -42,11 +43,17 @@ class DriversDB:
     def set_last_quarters(self, driver_id, values):
         self.drivers_database[driver_id].set_last_quarters(values)
 
+    def set_order(self, driver_id, val):
+        self.drivers_database[driver_id].set_on_order(val)
+
     def get_fatigue(self, driver_id):
         return self.drivers_database[driver_id].fatigue
 
-    def get_online_hour(self, driver_id, timestamp):
+    def get_online_hour(self, driver_id, timestamp) -> list:
         return self.drivers_database[driver_id].last_hour
 
-    def get_online_quarters(self, driver_id, timestamp):
+    def get_online_quarters(self, driver_id, timestamp) -> list:
         return self.drivers_database[driver_id].last_quarters
+
+    def get_on_order(self, driver_id, timestamp) -> list:
+        return self.drivers_database[driver_id].on_order
