@@ -19,8 +19,6 @@ def mpc_strategy(headers, request, route, aggregator, data_extractor):
 
     try:
         next_aggr_hash_id = request.chain[self_index + 1]
-        next_aggr_url = get_endpoint_url_by_hash(next_aggr_hash_id,
-                                                 headers["X-Authorization"])
     except IndexError:  # means this is the last aggregator in the chain
         for i, driver in enumerate(request.drivers):
             driver_data = data_extractor(driver.hash_id, request.timestamp)
@@ -32,6 +30,8 @@ def mpc_strategy(headers, request, route, aggregator, data_extractor):
         return SUCCESS
 
     ubic_shares = []
+    next_aggr_url = get_endpoint_url_by_hash(next_aggr_hash_id,
+                                             headers["X-Authorization"])
     for i, driver in enumerate(request.drivers):
         ubic_part = DriverData()
         ubic_part.hash_id = driver.hash_id
