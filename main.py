@@ -76,6 +76,8 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
                              x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
     """как парсить json в кастомный объект"""
+    data_extractor = aggregator.drivers_db.get_online_hour
+    route = "/v1/drivers/online/hourly"
     try:
         self_index = request.chain.index(aggregator.id)  # get index of aggr in chain
     except ValueError:
@@ -91,8 +93,8 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
         next_aggr_url = get_endpoint_url_by_hash(next_aggr_hash_id, x_authorization)
     except IndexError:  # means this is the last aggregator in the chain
         for i, driver in enumerate(request.drivers):
-            driver_data = aggregator.drivers_db.get_online_hour(driver.hash_id, request.timestamp)
-            request.drivers[i].shares[0] += driver_data   # simply send ubic our share
+            driver_data = data_extractor(driver.hash_id, request.timestamp)
+            request.drivers[i].shares[0] += driver_data   # simply send ubic our share summed with total
         r = send(UBIC_URL + V1_SHARES, headers, data=dumps(request))
         if r is None:
             pass
@@ -100,7 +102,7 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
 
     ubic_shares = []
     for i, driver in enumerate(request.drivers):
-        driver_data = aggregator.drivers_db.get_online_hour(driver.hash_id, request.timestamp)
+        driver_data = data_extractor(driver.hash_id, request.timestamp)
         ubic_share, common_share = get_rand_pair(int(driver_data))
         request.drivers[i].shares[0] += common_share  # only one share is expected for each driver
         dd = DriverData()
@@ -112,9 +114,7 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
     if r is None:  # handle errors
         return ERROR
 
-    r = send(next_aggr_url + "/v1/drivers/online/hourly",  # todo: replace the route with var
-             headers=headers,
-             data=dumps(request))
+    r = send(next_aggr_url + route, headers=headers, data=dumps(request))
     if r is None:  # handle errors
         return ERROR
     return SUCCESS
