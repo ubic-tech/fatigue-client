@@ -1,12 +1,10 @@
 # Press Shift+F10 to execute it or replace it with your code.
 from fastapi import FastAPI, Header
-from typing import Optional
 from rest_models import *
-from config import *
 from aggregator import Aggregator
 from logger.logger import log
 from mpc import get_rand_pair
-from sender import send
+from utils import *
 from json import dumps, JSONEncoder
 from collections import namedtuple
 
@@ -73,23 +71,11 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
     return SUCCESS
 
 
-def get_endpoint_url_by_hash(hash_id, x_auth):
-    headers = {
-        "X-Authorization": x_auth
-    }
-    data = {
-        "identifiers": [
-            hash_id,
-        ]
-    }
-    r = send(UBIC_URL + V1_ENDPOINTS, headers=headers, data=dumps(data))  # todo: parse to Endpoints
-    return r
-
-
 @app.post("/v1/drivers/online/hourly")
 def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
                              x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
+    """как парсить json в кастомный объект"""
     try:
         self_index = request.chain.index(aggregator.id)  # get index of aggr in chain
     except ValueError:
