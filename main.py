@@ -7,7 +7,8 @@ from aggregator import Aggregator
 from logger.logger import log
 from mpc import get_rand_pair
 from sender import send
-from json import dumps
+from json import dumps, JSONEncoder
+from collections import namedtuple
 
 """
 как забрать все хедеры в Auth
@@ -23,9 +24,6 @@ def init():
     for driver in DRIVERS_DATA:
         name, license_id = driver
         aggregator.add_driver(name, license_id)
-
-    for hash_id, url in AGGREGATORS_DATA.items():
-        aggregator.add_aggregator(hash_id, url)
     log(aggregator.name, " inited")
 
 
@@ -75,6 +73,19 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
     return SUCCESS
 
 
+def get_endpoint_url_by_hash(hash_id, x_auth):
+    headers = {
+        "X-Authorization": x_auth
+    }
+    data = {
+        "identifiers": [
+            hash_id,
+        ]
+    }
+    r = send(UBIC_URL + V1_ENDPOINTS, headers=headers, data=dumps(data))  # todo: parse to Endpoints
+    return r
+
+
 @app.post("/v1/drivers/online/hourly")
 def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
                              x_authorization: str = Header(...),
@@ -91,11 +102,15 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
 
     try:
         next_aggr_hash_id = request.chain[self_index + 1]
-        next_aggr_url = aggregator.aggregators[next_aggr_hash_id]
+        next_aggr_url = get_endpoint_url_by_hash(next_aggr_hash_id, x_authorization)
     except IndexError:  # means this is the last aggregator in the chain
         for i, driver in enumerate(request.drivers):
             driver_data = aggregator.drivers_db.get_online_hour(driver.hash_id, request.timestamp)
             request.drivers[i].shares[0] += driver_data   # simply send ubic our share
+        r = send(UBIC_URL + V1_SHARES, headers, data=dumps(request))
+        if r is None:
+            pass
+        return SUCCESS
 
     ubic_shares = []
     for i, driver in enumerate(request.drivers):

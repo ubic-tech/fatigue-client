@@ -2,6 +2,15 @@ from pydantic import BaseModel
 from typing import List
 
 
+class Endpoint(BaseModel):
+    id: str
+    endpoint: str
+
+
+class EndpointResponse(BaseModel):
+    endpoints: List[Endpoint]
+
+
 class DriverData(BaseModel):
     hash_id: str
     shares: List[int]  # 1 or 4 values depending on request/response
