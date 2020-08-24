@@ -4,8 +4,11 @@ from config import *
 from rest_models import *
 from aggregator import Aggregator
 from logger.logger import log
-from mpc import mpc_strategy
+from mpc import mpc_strategy, Violation
+from starlette.responses import JSONResponse
+
 #  uvicorn main:app  --port 8080
+
 
 app = FastAPI()
 router = APIRouter()
@@ -90,6 +93,11 @@ def v1_drivers_online_quarter_hourly(
 def v1_drivers_on_order(request: DriversOnOrderRequest):
     print(request)
     return SUCCESS
+
+
+@app.exception_handler(Violation)
+async def attribute_exists(request, exc):
+    return JSONResponse({"error": str(exc)}, status_code=503)
 
 
 app.include_router(
