@@ -4,7 +4,7 @@ from json import dumps
 from models.models import EndpointResponse
 
 
-def get_endpoint_url_by_hash(hash_id, x_auth):
+async def get_endpoint_url_by_hash(hash_id, x_auth):
     headers = {
         "X-Authorization": x_auth
     }
@@ -13,7 +13,7 @@ def get_endpoint_url_by_hash(hash_id, x_auth):
             hash_id,
         ]
     }
-    resp = post(UBIC_URL + V1_ENDPOINTS, headers=headers, data=dumps(data))
+    resp = await post(UBIC_URL + V1_ENDPOINTS, headers=headers, data=dumps(data))
     if resp is None:
         pass  # todo: validate
     return EndpointResponse(resp).endpoints[0].endpoint
