@@ -26,7 +26,8 @@ class DriversDB:
     provides interface to set/get fields of Driver data
     adders emulate insert op
     setters emulate update op
-    getters emulate select op"""
+    getters emulate select op
+    todo: remove setters"""
     def __init__(self, *args, **kwargs):
         self.drivers_database = {}
 

@@ -8,7 +8,7 @@ from mpc import mpc_strategy
 #  uvicorn main:app  --port 8080
 
 app = FastAPI()
-aggregator = Aggregator("Fast", 100500)
+aggregator = Aggregator("Fast", 100500)  # use env vars (taxi-mpc)
 
 
 def init():
@@ -19,6 +19,7 @@ def init():
 
 
 def _validate_put_request(handler):
+    """как это прикрутить? второй декоратор?"""
     def wrapper(*args, **kwargs):
         headers = args[0]
         xauth = headers.get("X-Authorization", "")
@@ -68,7 +69,8 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
                              x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
-    """как парсить json в кастомный объект"""
+    """как парсить json в кастомный объект?
+    как забрать все хедеры разом в один (?)список?"""
     data_extractor = aggregator.drivers_db.get_online_hour
     route = "/v1/drivers/online/hourly"
 
@@ -79,11 +81,11 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
     return mpc_strategy(headers, request, route, aggregator, data_extractor)
 
 
-@app.post("/v1/drivers/online/quarter_hourly")
+@app.post("/v1/drivers/online/quarter_hourly") # response model
 def v1_drivers_online_quarter_hourly(
         request: DriversOnlineQuarterHourlyRequest):
     print(request)
-    return SUCCESS
+    return SUCCESS  # exceptions
 
 
 @app.post("/v1/drivers/on_order")

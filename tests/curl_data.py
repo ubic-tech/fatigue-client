@@ -1,5 +1,3 @@
-"""как получить юрлы по хэшам в цепочках?"""
-
 headers = {
     "X-Authorization": "xauth",
     "X-Request-Id": "xreq",
@@ -18,7 +16,6 @@ drivers_fatigue_data = {
             "online": 100,
             "on_order": 50,
         },
-
     ]
 }
 
