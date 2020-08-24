@@ -2,6 +2,11 @@ from pydantic import BaseModel
 from typing import List
 
 
+class ServerResponse(BaseModel):
+    code: str
+    message: str
+
+
 class Endpoint(BaseModel):
     id: str
     endpoint: str

@@ -18,13 +18,17 @@ def init():
     log(aggregator.name, " inited")
 
 
-@app.get("/v1/health")
+@app.get("/v1/health",
+         response_model=ServerResponse,
+         response_model_exclude_unset=True)
 def v1_health():
     """simple heartbeat"""
     return SUCCESS
 
 
-@app.post("/v1/drivers/fatigue")
+@app.post("/v1/drivers/fatigue",
+          response_model=ServerResponse,
+          response_model_exclude_unset=True)
 def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
     """X-Authorization and X-Request-Id required
         stores data of tired drivers
@@ -52,7 +56,9 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
     return SUCCESS
 
 
-@app.post("/v1/drivers/online/hourly")
+@app.post("/v1/drivers/online/hourly",
+          response_model=ServerResponse,
+          response_model_exclude_unset=True)
 def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
                              x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
@@ -68,14 +74,18 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
     return mpc_strategy(headers, request, route, aggregator, data_extractor)
 
 
-@app.post("/v1/drivers/online/quarter_hourly") # response model
+@app.post("/v1/drivers/online/quarter_hourly",
+          response_model=ServerResponse,
+          response_model_exclude_unset=True)
 def v1_drivers_online_quarter_hourly(
         request: DriversOnlineQuarterHourlyRequest):
     print(request)
     return SUCCESS  # exceptions
 
 
-@app.post("/v1/drivers/on_order")
+@app.post("/v1/drivers/on_order",
+          response_model=ServerResponse,
+          response_model_exclude_unset=True)
 def v1_drivers_on_order(request: DriversOnOrderRequest):
     print(request)
     return SUCCESS
