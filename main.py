@@ -1,4 +1,3 @@
-# Press Shift+F10 to execute it or replace it with your code.
 from fastapi import FastAPI, Header, APIRouter
 from config import *
 from models.models import *
