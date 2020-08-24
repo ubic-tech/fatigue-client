@@ -1,5 +1,5 @@
 # Press Shift+F10 to execute it or replace it with your code.
-from fastapi import FastAPI, Header
+from fastapi import FastAPI, Header, APIRouter
 from config import *
 from rest_models import *
 from aggregator import Aggregator
@@ -8,6 +8,7 @@ from mpc import mpc_strategy
 #  uvicorn main:app  --port 8080
 
 app = FastAPI()
+router = APIRouter()
 aggregator = Aggregator("Fast", 100500)  # use env vars (taxi-mpc)
 
 
@@ -18,17 +19,17 @@ def init():
     log(aggregator.name, " inited")
 
 
-@app.get("/v1/health",
-         response_model=ServerResponse,
-         response_model_exclude_unset=True)
+@router.get("/health",
+            response_model=ServerResponse,
+            response_model_exclude_unset=True)
 def v1_health():
     """simple heartbeat"""
     return SUCCESS
 
 
-@app.post("/v1/drivers/fatigue",
-          response_model=ServerResponse,
-          response_model_exclude_unset=True)
+@router.post("/drivers/fatigue",
+             response_model=ServerResponse,
+             response_model_exclude_unset=True)
 def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
     """X-Authorization and X-Request-Id required
         stores data of tired drivers
@@ -56,9 +57,9 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
     return SUCCESS
 
 
-@app.post("/v1/drivers/online/hourly",
-          response_model=ServerResponse,
-          response_model_exclude_unset=True)
+@router.post("/drivers/online/hourly",
+             response_model=ServerResponse,
+             response_model_exclude_unset=True)
 def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
                              x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
@@ -74,21 +75,27 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
     return mpc_strategy(headers, request, route, aggregator, data_extractor)
 
 
-@app.post("/v1/drivers/online/quarter_hourly",
-          response_model=ServerResponse,
-          response_model_exclude_unset=True)
+@router.post("/drivers/online/quarter_hourly",
+             response_model=ServerResponse,
+             response_model_exclude_unset=True)
 def v1_drivers_online_quarter_hourly(
         request: DriversOnlineQuarterHourlyRequest):
     print(request)
     return SUCCESS  # exceptions
 
 
-@app.post("/v1/drivers/on_order",
-          response_model=ServerResponse,
-          response_model_exclude_unset=True)
+@router.post("/drivers/on_order",
+             response_model=ServerResponse,
+             response_model_exclude_unset=True)
 def v1_drivers_on_order(request: DriversOnOrderRequest):
     print(request)
     return SUCCESS
+
+
+app.include_router(
+    router,
+    prefix="/v1"
+)
 
 
 init()
