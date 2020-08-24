@@ -13,8 +13,7 @@ def get_endpoint_url_by_hash(hash_id, x_auth):
             hash_id,
         ]
     }
-    r = post(UBIC_URL + V1_ENDPOINTS, headers=headers, data=dumps(data))  # todo: parse to Endpoints
-    if r is None:
+    resp = post(UBIC_URL + V1_ENDPOINTS, headers=headers, data=dumps(data))
+    if resp is None:
         pass  # todo: validate
-    data = r.json()
-    return EndpointResponse(data).endpoints[0].endpoint
+    return EndpointResponse(resp).endpoints[0].endpoint
