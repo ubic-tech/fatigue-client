@@ -1,7 +1,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 from fastapi import FastAPI, Header, APIRouter
 from config import *
-from rest_models import *
+from models.models import *
 from aggregator import Aggregator
 from logger.logger import log
 from mpc import mpc_strategy, Violation

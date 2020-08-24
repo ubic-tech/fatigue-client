@@ -1,7 +1,7 @@
 from aio_requests import post
 from config import *
 from json import dumps
-from rest_models import EndpointResponse
+from models.models import EndpointResponse
 
 
 def get_endpoint_url_by_hash(hash_id, x_auth):

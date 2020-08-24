@@ -1,7 +1,7 @@
 from random import randint, seed
 from datetime import datetime
 from utils import *
-from rest_models import DriverData
+from models.models import DriverData
 from aio_requests import post
 
 
