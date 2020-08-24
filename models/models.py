@@ -21,20 +21,20 @@ class DriverData(BaseModel):
     shares: List[int]  # 1 or 4 values depending on request/response
 
 
-class DriversRequest(BaseModel):
+class Drivers(BaseModel):
     timestamp: str
     chain: List[str]
 
 
-class DriversOnlineHourlyRequest(DriversRequest):
+class OnlineHourly(Drivers):
     drivers: List[DriverData]
 
 
-class DriversOnlineQuarterHourlyRequest(DriversOnlineHourlyRequest):
+class OnlineQuarterHourly(OnlineHourly):
     pass
 
 
-class DriversOnOrderRequest(DriversOnlineHourlyRequest):
+class OnOrder(OnlineHourly):
     pass
 
 

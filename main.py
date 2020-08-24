@@ -63,7 +63,7 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 @router.post("/drivers/online/hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
+def v1_drivers_online_hourly(request: OnlineHourly,
                              x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
     """как парсить json в кастомный объект?
@@ -82,7 +82,7 @@ def v1_drivers_online_hourly(request: DriversOnlineHourlyRequest,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 def v1_drivers_online_quarter_hourly(
-        request: DriversOnlineQuarterHourlyRequest):
+        request: OnlineQuarterHourly):
     print(request)
     return SUCCESS  # exceptions
 
@@ -90,7 +90,7 @@ def v1_drivers_online_quarter_hourly(
 @router.post("/drivers/on_order",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def v1_drivers_on_order(request: DriversOnOrderRequest):
+def v1_drivers_on_order(request: OnOrder):
     print(request)
     return SUCCESS
 
