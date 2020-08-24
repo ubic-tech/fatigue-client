@@ -18,19 +18,6 @@ def init():
     log(aggregator.name, " inited")
 
 
-def _validate_put_request(handler):
-    """как это прикрутить? второй декоратор?"""
-    def wrapper(*args, **kwargs):
-        headers = args[0]
-        xauth = headers.get("X-Authorization", "")
-        xreq = headers.get("X-Request-Id", "")
-        if xauth == "" or xreq == "":
-            return ERROR
-        else:
-            return handler(*args, **kwargs)
-    return wrapper
-
-
 @app.get("/v1/health")
 def v1_health():
     """simple heartbeat"""
