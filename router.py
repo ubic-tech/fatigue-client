@@ -1,13 +1,13 @@
 from fastapi import Header, APIRouter
 from models.models import *
-from db.idrivers import IDriversDB  # todo: import certain impl
+from db.mongo import Mongo
 from aggregator import Aggregator
 from mpc import mpc_strategy
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
-aggregator = Aggregator("Fast", IDriversDB())  # use env vars (taxi-mpc)
+aggregator = Aggregator("Fast", Mongo())  # use env vars (taxi-mpc)
 
 
 @router.get("/health",
