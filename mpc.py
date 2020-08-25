@@ -11,7 +11,7 @@ def get_rand_pair(base: int) -> (int, int):
     return (f, s) if randint(0, 1) else (s, f)
 
 
-class Violation(Exception):
+class OperationError(Exception):
     pass
 
 
@@ -19,7 +19,7 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
     try:  # trying find 'myself' in the chain
         self_index = req_body.chain.index(aggregator.id)  # get index of aggr in chain
     except ValueError:
-        raise Violation
+        raise OperationError
 
     try:  # trying find next aggr in chain
         next_aggr_hash_id = req_body.chain[self_index + 1]
@@ -49,9 +49,9 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
 
     r = await request(UBIC_URL + V1_SHARES, headers=headers, json=ubic_drivers_shares)
     if r is None:  # handle errors
-        raise Violation
+        raise OperationError
 
     r = await request(next_aggr_url + route, headers=headers, json=req_body)
     if r is None:  # handle errors
-        raise Violation
+        raise OperationError
     return SUCCESS

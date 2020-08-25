@@ -3,7 +3,7 @@ from config import *
 from models.models import *
 from aggregator import Aggregator
 from logger.logger import log
-from mpc import mpc_strategy, Violation
+from mpc import mpc_strategy, OperationError
 from starlette.responses import JSONResponse
 
 #  uvicorn main:app  --port 8080
@@ -94,7 +94,7 @@ def v1_drivers_on_order(request: OnOrder):
     return SUCCESS
 
 
-@app.exception_handler(Violation)
+@app.exception_handler(OperationError)
 async def attribute_exists(request, exc):
     return JSONResponse({"error": str(exc)}, status_code=503)
 
