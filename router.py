@@ -52,17 +52,11 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 def v1_drivers_online_hourly(request: OnlineHourly,
-                             x_authorization: str = Header(...),
                              x_request_id: str = Header(...)):
-    """как парсить json в кастомный объект?
-    как забрать все хедеры разом в один (?)список?"""
     data_extractor = aggregator.drivers_db.get_online_hour
     route = "/v1/drivers/online/hourly"
 
-    headers = {
-        "X-Authorization": x_authorization,
-        "X-Request-Id": x_request_id,
-    }
+    headers = {"X-Request-Id": x_request_id, }
     mpc_strategy(headers, request, route, aggregator, data_extractor)
     return SUCCESS
 
