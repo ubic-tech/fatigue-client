@@ -32,7 +32,7 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
         r = request(UBIC_URL + V1_SHARES, headers=headers, json=req_body)
         if r is None:  # handle errors
             pass
-        return SUCCESS
+        return
 
     ubic_drivers_shares = []  # to be sent to UBIC
     next_aggr_url = await get_endpoint_url_by_hash(next_aggr_hash_id,
@@ -54,4 +54,3 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
     r = await request(next_aggr_url + route, headers=headers, json=req_body)
     if r is None:  # handle errors
         raise OperationError
-    return SUCCESS
