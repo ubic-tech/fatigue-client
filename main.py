@@ -16,3 +16,13 @@ app.include_router(
     router,
     prefix="/v1"
 )
+
+
+@app.on_event("startup")
+async def init_app():
+    pass
+
+
+@app.on_event("shutdown")
+async def close_app():
+    pass
