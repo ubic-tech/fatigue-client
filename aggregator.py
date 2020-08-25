@@ -1,11 +1,7 @@
-from driversDB import DriversDB
+from idrivers_db import IDriversDB
 
 
 class Aggregator:
-    def __init__(self, name, _id):
-        self.name = name
-        self.id = _id
-        self.drivers_db = DriversDB()
-
-    def add_driver(self, full_name, license_id):
-        self.drivers_db.add_driver(full_name, license_id)
+    def __init__(self, hash_id: str, drivers_db: IDriversDB):
+        self.hash_id = hash_id
+        self.drivers_db = drivers_db  # provides interface for "/drivers/*" handlers
