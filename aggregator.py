@@ -1,4 +1,4 @@
-from idrivers_db import IDriversDB
+from db.idrivers import IDriversDB
 
 
 class Aggregator:

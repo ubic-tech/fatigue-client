@@ -2,7 +2,6 @@ from fastapi import FastAPI, Header, APIRouter
 from config import *
 from models.models import *
 from aggregator import Aggregator
-from logger.logger import log
 from mpc import mpc_strategy, OperationError
 from starlette.responses import JSONResponse
 
@@ -11,14 +10,7 @@ from starlette.responses import JSONResponse
 
 app = FastAPI()
 router = APIRouter()
-aggregator = Aggregator("Fast", 100500)  # use env vars (taxi-mpc)
-
-
-def init():
-    for driver in DRIVERS_DATA:
-        name, license_id = driver
-        aggregator.add_driver(name, license_id)
-    log(aggregator.name, " inited")
+aggregator = Aggregator("Fast", None)  # use env vars (taxi-mpc)
 
 
 @router.get("/health",
