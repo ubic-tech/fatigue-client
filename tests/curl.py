@@ -1,4 +1,4 @@
-from utils import request, StatusError
+from common.utils import request, StatusError
 from tests.curl_data import *
 from json import dumps
 import asyncio

@@ -1,6 +1,6 @@
 from random import randint, seed
 from datetime import datetime
-from utils import *
+from common.utils import *
 from models.models import DriverData
 
 
