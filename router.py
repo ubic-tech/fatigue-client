@@ -63,7 +63,8 @@ def v1_drivers_online_hourly(request: OnlineHourly,
         "X-Authorization": x_authorization,
         "X-Request-Id": x_request_id,
     }
-    return mpc_strategy(headers, request, route, aggregator, data_extractor)
+    mpc_strategy(headers, request, route, aggregator, data_extractor)
+    return SUCCESS
 
 
 @router.post("/drivers/online/quarter_hourly",
