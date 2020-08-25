@@ -1,3 +1,8 @@
-UBIC_URL = "http://127.0.0.1:8888"
-V1_SHARES = "/v1/shares"
-V1_ENDPOINTS = "/v1/endpoints"
+from common.config import env_config
+
+
+@env_config
+class AggregatorConfig:
+    UBIC_URL: str = "http://127.0.0.1:8888"
+    SHARES_ROUTE: str = "/v1/shares"
+    ENDPOINTS_ROUTE: str = "/v1/endpoints"

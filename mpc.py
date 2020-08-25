@@ -1,6 +1,7 @@
 from random import randint, seed
 from datetime import datetime
 from common.utils import *
+from config import AggregatorConfig as AggrConf
 from models.models import DriverData
 
 
@@ -29,7 +30,9 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
             for j, d in enumerate(driver_data):  # 1 or 4 values in list are expected
                 req_body.drivers[i].shares[j] += d
         # simply send ubic our share summed with total
-        r = request(UBIC_URL + V1_SHARES, headers=headers, json=req_body)
+        r = request(AggrConf.UBIC_URL + AggrConf.V1_SHARES,
+                    headers=headers,
+                    json=req_body)
         if r is None:  # handle errors
             pass
         return
@@ -47,7 +50,9 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
             ubic_driver_shares.shares.append(for_ubic)  # keep all shares (looks like: [share,...]) of a driver
         ubic_drivers_shares.append(ubic_driver_shares)
 
-    r = await request(UBIC_URL + V1_SHARES, headers=headers, json=ubic_drivers_shares)
+    r = await request(AggrConf.UBIC_URL + AggrConf.V1_SHARES,
+                      headers=headers,
+                      json=ubic_drivers_shares)
     if r is None:  # handle errors
         raise OperationError
 
