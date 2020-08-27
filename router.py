@@ -7,7 +7,7 @@ from mpc import mpc_strategy
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
-aggregator = Aggregator("Fast", Mongo())  # use env vars (taxi-mpc)
+aggregator = Aggregator("Fast", Mongo(None))  # use env vars (taxi-mpc)
 
 
 @router.get("/health",
@@ -53,7 +53,7 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
              response_model_exclude_unset=True)
 def v1_drivers_online_hourly(request: OnlineHourly,
                              x_request_id: str = Header(...)):
-    data_extractor = aggregator.drivers_db.get_online_hour
+    data_extractor = aggregator.drivers_db.get_hourly
     route = "/v1/drivers/online/hourly"
 
     headers = {"X-Request-Id": x_request_id, }
