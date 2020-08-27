@@ -1,5 +1,4 @@
 from random import randint, seed
-from datetime import datetime
 from common.utils import *
 from config import AggregatorConfig as AggrConf
 from models.models import DriverData
@@ -22,13 +21,18 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
     except ValueError:
         raise OperationError
 
+    ts = timestamp_to_datetime(req_body.timestamp)
+    drivers_hash_ids = []
+    for _d in req_body.drivers:
+        drivers_hash_ids.append(_d["hash_id"])
+    self_data = data_extractor(ts, drivers_hash_ids)  # Mapping[DriverID, Share]
+
     try:  # trying find next aggr in chain
         next_aggr_hash_id = req_body.chain[self_index + 1]
     except IndexError:  # means 'me' is the last aggregator in the chain
-        for i, driver in enumerate(req_body.drivers):  # sum up 'my' shares with received ones
-            driver_data = data_extractor(driver.hash_id, req_body.timestamp)
-            for j, d in enumerate(driver_data):  # 1 or 4 values in list are expected
-                req_body.drivers[i].shares[j] += d
+        for i, driver_data in enumerate(req_body.drivers):  # sum up 'my' shares with received ones
+            _id = driver_data["hash_id"]
+            req_body.drivers[i]["share"] += self_data[_id]  # common share + "my" shares gotten by hash_id
         # simply send ubic our share summed with total
         r = request(AggrConf.UBIC_URL + AggrConf.V1_SHARES,
                     headers=headers,
@@ -37,18 +41,18 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
             pass
         return
 
+    next_aggr_url = await get_endpoint_url_by_hash(next_aggr_hash_id)  # request in advance
     ubic_drivers_shares = []  # to be sent to UBIC
-    next_aggr_url = await get_endpoint_url_by_hash(next_aggr_hash_id,
-                                                   headers["X-Authorization"])
     for i, driver in enumerate(req_body.drivers):
-        ubic_driver_shares = DriverData()  # to be appended to ubic_drivers_shares
-        ubic_driver_shares.hash_id = driver.hash_id
-        raw_driver_data = data_extractor(driver.hash_id, req_body.timestamp)  # value from driversDB: [share, ...]
-        for j, d in enumerate(raw_driver_data):
-            for_ubic, for_common = get_rand_pair(int(d))  # for_ubic + for_common == d
-            req_body.drivers[i].shares[j] += for_common  # add 'my' share summed up with common
-            ubic_driver_shares.shares.append(for_ubic)  # keep all shares (looks like: [share,...]) of a driver
-        ubic_drivers_shares.append(ubic_driver_shares)
+        self_share = self_data[driver.hash_id]
+        for_ubic, for_common = get_rand_pair(int(self_share))  # for_ubic + for_common == d
+
+        ubic_driver_share = DriverData()  # to be appended to ubic_drivers_shares
+        ubic_driver_share.hash_id = driver.hash_id
+        ubic_driver_share.share = for_ubic
+        ubic_drivers_shares.append(ubic_driver_share)
+
+        req_body.drivers[i].share += for_common  # add 'my' share summed up with common
 
     r = await request(AggrConf.UBIC_URL + AggrConf.V1_SHARES,
                       headers=headers,

@@ -18,7 +18,7 @@ class EndpointResponse(BaseModel):
 
 class DriverData(BaseModel):
     hash_id: str
-    shares: List[int]  # 1 or 4 values depending on request/response
+    share: int
 
 
 class Drivers(BaseModel):
