@@ -3,11 +3,12 @@ from models.models import *
 from db.mongo import Mongo
 from aggregator import Aggregator
 from mpc import mpc_strategy
+from config import AggregatorConfig
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
-aggregator = Aggregator("Fast", Mongo(None))  # use env vars (taxi-mpc)
+aggregator = Aggregator(AggregatorConfig.AGGR_HASH_ID, Mongo())
 
 
 @router.get("/health",
