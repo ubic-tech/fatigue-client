@@ -47,8 +47,3 @@ class DriverFatigue(BaseModel):
 class DriversFatigue(BaseModel):
     timestamp: str
     drivers: List[DriverFatigue]
-
-
-class Auth:
-    x_authorization: str
-    x_request_id: str
