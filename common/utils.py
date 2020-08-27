@@ -1,5 +1,5 @@
 import aiohttp
-from config import *
+from config import AggregatorConfig
 from models.models import EndpointResponse
 
 
@@ -15,10 +15,9 @@ async def request(url, *, method='post', expected_status=200, **kwargs):
             return await resp.json()
 
 
-async def get_endpoint_url_by_hash(hash_id, x_auth):
-    resp = await request(UBIC_URL + V1_ENDPOINTS,
-                         headers={"X-Authorization": x_auth},
+async def get_endpoint_url_by_hash(hash_id):
+    resp = await request(AggregatorConfig.UBIC_URL + AggregatorConfig.V1_ENDPOINTS,
                          json={"identifiers": [hash_id, ]})
     if resp is None:
         pass  # todo: validate
-    return EndpointResponse(resp).endpoints[0].endpoint
+    return EndpointResponse(**resp).endpoints[0].endpoint
