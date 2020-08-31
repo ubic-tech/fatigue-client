@@ -34,13 +34,14 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
     except IndexError:  # means 'me' is the last aggregator in the chain
         for i, driver_data in enumerate(req_body.drivers):  # sum up 'my' shares with received ones
             _id = driver_data.hash_id
-            req_body.drivers[i].shares += self_data[_id]  # common share + "my" shares gotten by hash_id
+            self_shares = self_data[_id]
+            for j, share in enumerate(self_shares):  # common shares += "my" shares gotten by hash_id
+                req_body.drivers[i].shares[j] += self_shares[j]
         # simply send ubic our share summed with total
-        r = request(AggrConf.UBIC_URL + AggrConf.V1_SHARES,
-                    headers=headers,
-                    json=req_body)
-        if r is None:  # handle errors
-            pass
+        #r = request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE, headers=headers, json=req_body)
+        #if r is None:  # handle errors
+        #    pass
+        print("req_body", req_body.drivers, "\n\n")
         return
 
     #next_aggr_url = await get_endpoint_url_by_hash(next_aggr_hash_id)  # request in advance
@@ -57,7 +58,7 @@ async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
     print("ubic_drivers_shares", ubic_drivers_shares, "\n\n")
     print("req_body", req_body.drivers, "\n\n")
 """
-    r = await request(AggrConf.UBIC_URL + AggrConf.V1_SHARES,
+    r = await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
                       headers=headers,
                       json=ubic_drivers_shares)
     if r is None:  # handle errors
