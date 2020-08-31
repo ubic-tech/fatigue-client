@@ -55,13 +55,13 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 @router.post("/drivers/online/hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def v1_drivers_online_hourly(request: OnlineHourly,
-                             x_request_id: str = Header(...)):
+async def v1_drivers_online_hourly(request: OnlineHourly,
+                                   x_request_id: str = Header(...)):
     data_extractor = aggregator.drivers_db.get_hourly
     route = "/v1/drivers/online/hourly"
 
     headers = {"X-Request-Id": x_request_id, }
-    mpc_strategy(headers, request, route, aggregator, data_extractor)
+    await mpc_strategy(headers, request, route, aggregator, data_extractor)
     return SUCCESS
 
 
