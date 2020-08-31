@@ -3,6 +3,7 @@ from re import search, findall, sub
 from config import AggregatorConfig
 from models.models import EndpointResponse
 from datetime import datetime, date, time
+import hashlib
 
 
 class StatusError(Exception):
@@ -44,3 +45,7 @@ def timestamp_to_datetime(timestamp: str) -> datetime:
     t = time(_dict["hour"], _dict["minute"], _dict["second"], _dict["millis"] * 1000)
 
     return datetime.combine(d, t)
+
+
+def generate_id(x: str) -> str:
+    return hashlib.sha256(x.encode('utf-8')).hexdigest()

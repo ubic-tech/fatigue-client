@@ -1,14 +1,17 @@
 from fastapi import Header, APIRouter
 from models.models import *
-from db.mongo import Mongo
+from db.clickhouse_repository import ClickhouseRepository
 from aggregator import Aggregator
 from mpc import mpc_strategy
 from config import AggregatorConfig
+from common.utils import generate_id
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
-aggregator = Aggregator(AggregatorConfig.AGGR_HASH_ID, Mongo())
+aggregator = Aggregator(generate_id(AggregatorConfig.AGGR_NAME),
+                        ClickhouseRepository(AggregatorConfig.CLICK_HOUSE_URL,
+                                             AggregatorConfig.AGGR_NAME))
 
 
 @router.get("/health",
