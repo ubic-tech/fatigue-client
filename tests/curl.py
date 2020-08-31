@@ -38,11 +38,11 @@ async def test_drivers_on_order():
 
 async def all_tests():
     tests = [
-        test_v1_health,
-        test_drivers_fatigue,
+        #test_v1_health,
+        #test_drivers_fatigue,
         test_drivers_online_hour,
-        test_drivers_online_quarter_hourly,
-        test_drivers_on_order,
+        #test_drivers_online_quarter_hourly,
+        #test_drivers_on_order,
     ]
 
     for test in tests:
