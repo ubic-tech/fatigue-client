@@ -27,9 +27,7 @@ async def get_endpoint_url_by_hash(hash_id):
 
 
 def timestamp_to_datetime(timestamp: str) -> datetime:
-    pattern = "{year}-{month}-{day}T{hour}:{minute}:{second}:{millis}Z"
-
-    timestamp = timestamp.replace(".", ":")  # !!! crutch !!!
+    pattern = "{year}-{month}-{day}T{hour}:{minute}:{second}Z"
 
     # re stuff
     regex = sub(r'{(.+?)}', r'(?P<_\1>.+)', pattern)
@@ -42,7 +40,7 @@ def timestamp_to_datetime(timestamp: str) -> datetime:
 
     _dict = dict(zip(keys, values))
     d = date(_dict["year"], _dict["month"], _dict["day"])
-    t = time(_dict["hour"], _dict["minute"], _dict["second"], _dict["millis"] * 1000)
+    t = time(_dict["hour"], _dict["minute"], _dict["second"])
 
     return datetime.combine(d, t)
 
