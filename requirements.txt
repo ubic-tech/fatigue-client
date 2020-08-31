@@ -3,3 +3,8 @@ pydantic
 aiohttp
 starlette
 pytest
+click==7.1.2
+clickhouse-driver==0.1.4
+numpy==1.19.1
+pytz==2020.1
+tzlocal==2.1
