@@ -41,9 +41,20 @@ def continue_mpc(request_drivers: List[DriverData],
     return ubic_drivers_shares
 
 
+def finalize_mpc(request_drivers: List[DriverData],
+                 self_db_data: Mapping[DriverID, List[Share]]):
+    for i, driver_data in enumerate(request_drivers):  # sum up 'my' shares with received ones
+        _id = driver_data.hash_id
+        self_shares = self_db_data[_id]
+        for j, share in enumerate(self_shares):  # common shares += "my" shares gotten by hash_id
+            request_drivers[i].shares[j] += self_shares[j]
+
+
 async def common_strategy(headers, req_body, route, data_extractor):
+    ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
     ts = timestamp_to_datetime(req_body.timestamp)
 
+    #  todo: use list gen?
     drivers_hash_ids = []
     for _d in req_body.drivers:
         drivers_hash_ids.append(_d.hash_id)
@@ -58,24 +69,11 @@ async def common_strategy(headers, req_body, route, data_extractor):
         print("ubic_drivers_shares", ubic_drivers_shares, "\n\n")  # DBG
         print("req_body", req_body.drivers, "\n\n")  # DBG
 
-        #r = await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
-        #                  headers=headers,
-        #                  json=ubic_drivers_shares)
-        #if r is None:  # handle errors
-        #    pass
+        #await request(ubic_shares_route, headers=headers, json=ubic_drivers_shares)
 
-        #r = await request(next_endpoint_url + route, headers=headers, json=req_body)
-        #if r is None:  # handle errors
-        #    # raise OperationError
-        #    pass
+        #await request(next_endpoint_url + route, headers=headers, json=req_body)
     else:
-        for i, driver_data in enumerate(req_body.drivers):  # sum up 'my' shares with received ones
-            _id = driver_data.hash_id
-            self_shares = self_db_data[_id]
-            for j, share in enumerate(self_shares):  # common shares += "my" shares gotten by hash_id
-                req_body.drivers[i].shares[j] += self_shares[j]
+        finalize_mpc(req_body.drivers, self_db_data)
         # simply send ubic our share summed with total
-        #r = request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE, headers=headers, json=req_body)
-        #if r is None:  # handle errors
-        #    pass
+        #await request(ubic_shares_route, headers=headers, json=req_body)
         print("req_body", req_body.drivers, "\n\n")
