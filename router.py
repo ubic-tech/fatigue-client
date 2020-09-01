@@ -2,14 +2,14 @@ from fastapi import Header, APIRouter
 from models.models import *
 from db.clickhouse_repository import ClickhouseRepository
 from aggregator import Aggregator
-from mpc import mpc_strategy
+from mpc import common_strategy
 from config import AggregatorConfig
-from common.utils import generate_id
+
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
-aggregator = Aggregator(generate_id(AggregatorConfig.AGGR_NAME),
+aggregator = Aggregator(AggregatorConfig.AGGR_HASH_ID,
                         ClickhouseRepository(AggregatorConfig.CLICK_HOUSE_URL,
                                              AggregatorConfig.AGGR_NAME))
 
@@ -61,7 +61,7 @@ async def v1_drivers_online_hourly(request: OnlineHourly,
     route = "/v1/drivers/online/hourly"
 
     headers = {"X-Request-Id": x_request_id, }
-    await mpc_strategy(headers, request, route, aggregator, data_extractor)
+    await common_strategy(headers, request, route, data_extractor)
     return SUCCESS
 
 

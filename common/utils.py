@@ -44,6 +44,3 @@ def timestamp_to_datetime(timestamp: str) -> datetime:
 
     return datetime.combine(d, t)
 
-
-def generate_id(x: str) -> str:
-    return hashlib.sha256(x.encode('utf-8')).hexdigest()

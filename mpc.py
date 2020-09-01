@@ -2,6 +2,7 @@ from random import randint, seed
 from common.utils import *
 from config import AggregatorConfig as AggrConf
 from models.models import DriverData
+from typing import List
 
 
 def get_rand_pair(base: int) -> (int, int):
@@ -15,9 +16,13 @@ class OperationError(Exception):
     pass
 
 
-async def mpc_strategy(headers, req_body, route, aggregator, data_extractor):
+def get_next_endpoint(chain: List[str]):
+    return None
+
+
+async def common_strategy(headers, req_body, route, data_extractor):
     try:  # trying find 'myself' in the chain
-        self_index = req_body.chain.index(aggregator.hash_id)  # get index of aggr in chain
+        self_index = req_body.chain.index(AggrConf.AGGR_HASH_ID)  # get index of aggr in chain
     except ValueError:
         # raise OperationError
         pass
