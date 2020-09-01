@@ -18,9 +18,9 @@ async def request(url, *, method='post', expected_status=200, **kwargs):
             return await resp.json()
 
 
-async def get_endpoint_url_by_hash(hash_id):
-    resp = await request(AggregatorConfig.UBIC_URL + AggregatorConfig.V1_ENDPOINTS,
-                         json={"identifiers": [hash_id, ]})
+async def get_endpoint_url_by_hash(hash_id) -> str:
+    route = AggregatorConfig.UBIC_URL + AggregatorConfig.ENDPOINTS_ROUTE
+    resp = await request(route, json={"identifiers": [hash_id, ]})
     if resp is None:
         pass  # todo: validate
     return EndpointResponse(**resp).endpoints[0].endpoint
