@@ -81,8 +81,6 @@ drivers_online_hourly_request_data_final = {
         },
     ],
     "chain": [
-        "fc33f73246f48295702f404001e74d56f14d2f82689b2816422dc1a4c2ec4fb2",
-        "4b79a79f55f212dc479a5da443942efe08a8ff8b1e4d6ff2f351c305c8f4bcd0",
         "2e6e018516f4caaf129ac71a377fc6f41a80415230228b697c9be0854ba1f820",
     ],
 }
