@@ -49,12 +49,11 @@ def continue_mpc_helper(request_data, self_db_data, shares_len):
         assert p.hash_id == u.hash_id == r.hash_id
         assert len(p.shares) == len(u.shares) == len(r.shares) == shares_len
         hash_id = p.hash_id
-        self_shares = self_db_data[hash_id]
-        shares_len = len(p.shares)
-        assert shares_len == len(self_shares)
+        db_shares = self_db_data[hash_id]
+        assert shares_len == len(db_shares)
         for i in range(shares_len):
             web_part = u.shares[i] + p.shares[i]
-            db_part = r.shares[i] + self_shares[i]
+            db_part = r.shares[i] + db_shares[i]
             assert web_part == db_part
 
 
@@ -71,7 +70,7 @@ def finalize_mpc_helper(request_data, self_db_data, shares_len):
             assert db_shares[i] + r.shares[i] == p.shares[i]
 
 
-def test_continue_mpc():
+def test_mpc():
     for self_db_data in self_db_data_sets:
         shares_len = len(self_db_data[drivers_hash_ids[0]])  # lens should be equal
         request_data = get_request_data(drivers_hash_ids, shares_len)
