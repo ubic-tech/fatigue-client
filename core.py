@@ -57,10 +57,7 @@ async def common_strategy(headers, req_body, route, data_extractor):
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
     ts = timestamp_to_datetime(req_body.timestamp)
 
-    #  todo: use list gen?
-    drivers_hash_ids = []
-    for _d in req_body.drivers:
-        drivers_hash_ids.append(_d.hash_id)
+    drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     self_db_data = data_extractor(ts, drivers_hash_ids)  # Mapping[DriverID, Share]
 
     print("self_db_data: ", self_db_data)  # DBG
