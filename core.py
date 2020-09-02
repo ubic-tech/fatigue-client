@@ -53,28 +53,38 @@ def finalize_mpc(request_drivers: List[DriverData],
             request_drivers[i].shares[j] += self_shares[j]
 
 
+def mpc_strategy(req_body_drivers: List[DriverData],
+                 self_db_data: Mapping[DriverID, List[Share]],
+                 next_endpoint_hash_id: str):
+    print("self_db_data: ", self_db_data)  # DBG
+
+    if len(next_endpoint_hash_id):
+        ubic_drivers_shares = continue_mpc(req_body_drivers, self_db_data)
+
+        print("ubic_drivers_shares: ", ubic_drivers_shares)  # DBG
+        print("forwarding req: ", req_body_drivers)  # DBG
+        return ubic_drivers_shares, req_body_drivers
+    else:
+        finalize_mpc(req_body_drivers, self_db_data)
+        # simply send ubic our share summed with total
+        print("forwarding req: ", req_body_drivers)
+        return req_body_drivers, None
+
+
 async def common_strategy(headers, req_body, route, data_extractor):
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
     ts = timestamp_to_datetime(req_body.timestamp)
 
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     self_db_data = data_extractor(ts, drivers_hash_ids)  # Mapping[DriverID, Share]
-
-    print("self_db_data: ", self_db_data)  # DBG
-
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
-        #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
-        ubic_drivers_shares = continue_mpc(req_body.drivers, self_db_data)
+        next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
 
-        print("ubic_drivers_shares: ", ubic_drivers_shares)  # DBG
-        print("forwarding req: ", req_body.drivers)  # DBG
+    for_ubic, req_body.drivers = mpc_strategy(req_body, self_db_data, next_endpoint_hash_id)
 
-        #await request(ubic_shares_route, headers=headers, json=ubic_drivers_shares)
-
-        #await request(next_endpoint_url + route, headers=headers, json=req_body)
+    if next_endpoint_hash_id:
+        await request(next_endpoint_url + route, headers=headers, json=req_body)
+        await request(ubic_shares_route, headers=headers, json=for_ubic)
     else:
-        finalize_mpc(req_body.drivers, self_db_data)
-        # simply send ubic our share summed with total
-        #await request(ubic_shares_route, headers=headers, json=req_body)
-        print("forwarding req: ", req_body.drivers)
-    print("\n\n")
+        req_body.drivers = for_ubic
+        await request(ubic_shares_route, headers=headers, json=req_body)
