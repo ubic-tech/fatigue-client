@@ -78,10 +78,13 @@ async def common_strategy(headers, req_body, route, data_extractor):
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     self_db_data = data_extractor(ts, drivers_hash_ids)  # Mapping[DriverID, Share]
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
-        next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
+        #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
+        pass
 
-    for_ubic, req_body.drivers = mpc_strategy(req_body, self_db_data, next_endpoint_hash_id)
+    for_ubic, req_body.drivers = mpc_strategy(req_body.drivers, self_db_data, next_endpoint_hash_id)
 
+    print("\n\n")
+    return
     if next_endpoint_hash_id:
         await request(next_endpoint_url + route, headers=headers, json=req_body)
         await request(ubic_shares_route, headers=headers, json=for_ubic)
