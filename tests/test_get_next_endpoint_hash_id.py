@@ -1,16 +1,17 @@
 from core import get_next_endpoint_hash_id, OperationError
 from config import AggregatorConfig as AggrConf
+from copy import deepcopy
 
 
 def test_positive():
     sets = [
         [AggrConf.AGGR_HASH_ID, "OK", "FAIL", "FAIL", "FAIL", ],
-        ["FAIL", AggrConf.AGGR_HASH_ID, "OK", "FAIL", "FAIL", ],
-        ["FAIL", "FAIL", AggrConf.AGGR_HASH_ID, "OK", "FAIL", ],
-        ["FAIL", "FAIL", "FAIL", AggrConf.AGGR_HASH_ID, "OK", ],
+        [AggrConf.AGGR_HASH_ID, "OK", "FAIL", ],
+        [AggrConf.AGGR_HASH_ID, "OK", ],
     ]
-    for s in sets:
+    for i, s in enumerate(deepcopy(sets)):
         assert get_next_endpoint_hash_id(s) == "OK"
+        assert s == sets[i][1:]  # testing popping
 
 
 def test_self_not_found():
@@ -30,8 +31,7 @@ def test_self_not_found():
 def test_self_last():
     sets = [
         [AggrConf.AGGR_HASH_ID, ],
-        ["FAIL", AggrConf.AGGR_HASH_ID, ],
-        ["FAIL", "FAIL", "FAIL", "FAIL", "FAIL", AggrConf.AGGR_HASH_ID, ],
     ]
     for s in sets:
         assert get_next_endpoint_hash_id(s) == ""
+        assert s == []

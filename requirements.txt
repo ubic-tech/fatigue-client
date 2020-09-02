@@ -3,6 +3,7 @@ pydantic
 aiohttp
 starlette
 pytest
+pytest-asyncio
 click==7.1.2
 clickhouse-driver==0.1.4
 numpy==1.19.1

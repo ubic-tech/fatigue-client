@@ -18,13 +18,15 @@ class OperationError(Exception):
 
 
 def get_next_endpoint_hash_id(chain: List[str]) -> str:
-    try:  # trying find 'myself' in the chain
-        self_index = chain.index(AggrConf.AGGR_HASH_ID)  # get index of aggr in chain
-    except ValueError:
+    try:  # the 1st hash_id is expected to be 'mine'
+        if chain[0] != AggrConf.AGGR_HASH_ID:
+            raise OperationError
+    except IndexError:
         raise OperationError
-    try:  # trying find next aggr in chain
-        return chain[self_index + 1]
-    except IndexError:  # means 'me' is the last aggregator in the chain
+    chain.pop(0)  # pop 'my' hash_id
+    try:  # try getting next aggr in chain
+        return chain[0]  # return the next endpoint's hash_id
+    except IndexError:  # means 'I' am the last aggregator in the chain
         return ""
 
 
