@@ -5,6 +5,7 @@ from models.models import DriverData
 from typing import List, Mapping
 from db.drivers_repository import DriverID, Share
 
+
 def get_rand_pair(base: int) -> (int, int):
     seed(datetime.now().microsecond)
     f = randint(1000, 2000)
@@ -34,7 +35,7 @@ def continue_mpc(request_drivers: List[DriverData],
         self_shares = self_db_data[driver.hash_id]
         ubic_driver_data = DriverData(hash_id=driver.hash_id, shares=[])  # to be appended to ubic_drivers_shares
         for j, share in enumerate(self_shares):
-            for_ubic, for_common = get_rand_pair(int(share))  # for_ubic + for_common == d
+            for_ubic, for_common = get_rand_pair(int(share))  # for_ubic + for_common == share
             ubic_driver_data.shares.append(for_ubic)
             request_drivers[i].shares[j] += for_common  # add 'my' share summed up with common
         ubic_drivers_shares.append(ubic_driver_data)
@@ -60,14 +61,14 @@ async def common_strategy(headers, req_body, route, data_extractor):
         drivers_hash_ids.append(_d.hash_id)
     self_db_data = data_extractor(ts, drivers_hash_ids)  # Mapping[DriverID, Share]
 
-    print(self_db_data)  # DBG
+    print("self_db_data: ", self_db_data)  # DBG
 
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
         #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
         ubic_drivers_shares = continue_mpc(req_body.drivers, self_db_data)
 
-        print("ubic_drivers_shares", ubic_drivers_shares, "\n\n")  # DBG
-        print("req_body", req_body.drivers, "\n\n")  # DBG
+        print("ubic_drivers_shares: ", ubic_drivers_shares)  # DBG
+        print("forwarding req: ", req_body.drivers)  # DBG
 
         #await request(ubic_shares_route, headers=headers, json=ubic_drivers_shares)
 
@@ -76,4 +77,5 @@ async def common_strategy(headers, req_body, route, data_extractor):
         finalize_mpc(req_body.drivers, self_db_data)
         # simply send ubic our share summed with total
         #await request(ubic_shares_route, headers=headers, json=req_body)
-        print("req_body", req_body.drivers, "\n\n")
+        print("forwarding req: ", req_body.drivers)
+    print("\n\n")

@@ -2,7 +2,7 @@ from fastapi import Header, APIRouter
 from models.models import *
 from db.clickhouse_repository import ClickhouseRepository
 from aggregator import Aggregator
-from mpc import common_strategy
+from core import common_strategy
 from config import AggregatorConfig
 
 

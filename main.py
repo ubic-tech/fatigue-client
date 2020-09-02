@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from mpc import OperationError
+from core import OperationError
 from starlette.responses import JSONResponse
 from router import router
 
