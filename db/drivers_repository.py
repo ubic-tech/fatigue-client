@@ -9,12 +9,12 @@ Share = int
 class DriversRepository(ABC):
     @abstractmethod
     def get_hourly(self, ts: datetime,
-                   drivers: Iterable[DriverID]) -> Mapping[DriverID, Share]:
+                   drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
         pass
 
     @abstractmethod
     def get_on_order(self, ts: datetime,
-                     drivers: Iterable[DriverID]) -> Mapping[DriverID, Share]:
+                     drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
         pass
 
     @abstractmethod

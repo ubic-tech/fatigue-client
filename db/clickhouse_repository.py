@@ -41,7 +41,7 @@ class ClickhouseRepository(DriversRepository):
         return self._client.execute(_q, columnar=True)[0]
 
     def _get_hourly(self, ts: datetime,
-                    drivers: Iterable[DriverID]) -> Mapping[DriverID, Share]:
+                    drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
         _r15 = 'toStartOfFifteenMinutes'
         _q = (
             'SELECT'
@@ -54,11 +54,11 @@ class ClickhouseRepository(DriversRepository):
         return self._client.execute_iter(_q)
 
     def get_hourly(self, ts: datetime,
-                   drivers: Iterable[DriverID]) -> Mapping[DriverID, Share]:
+                   drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
         return self.make_dict(self._get_hourly(ts, drivers))
     
     def get_on_order(self, ts: datetime,
-                     drivers: Iterable[DriverID]) -> Mapping[DriverID, Share]:
+                     drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
         return self.make_dict(self._get_hourly(ts, drivers), norm=False)
     
     def get_quarter_hourly(self, ts: datetime,
