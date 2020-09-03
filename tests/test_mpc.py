@@ -1,4 +1,4 @@
-from core import continue_mpc, finalize_mpc
+from core import continue_mpc, finalize_mpc, mpc_strategy
 from models.models import DriverData
 from random import randint, seed
 from datetime import datetime
@@ -23,7 +23,7 @@ self_db_data_sets = [
     {h: [randint(0, 1) for _ in range(101)] for h in drivers_hash_ids},
     {h: [randint(-1000, 1000) for _ in range(101)] for h in drivers_hash_ids},
     {h: [randint(0, 1) for _ in range(1010)] for h in drivers_hash_ids},
-    # heavy tests below
+    # severe tests below
     # {h: [randint(-1000, 1000) for _ in range(1010)] for h in drivers_hash_ids},
     # {h: [randint(0, 1) for _ in range(10**5 + 1)] for h in drivers_hash_ids},
     # {h: [randint(-(10**24), 10**24) for _ in range(10**5 - 1)] for h in drivers_hash_ids},
@@ -39,10 +39,7 @@ def get_request_data(hash_ids: List[str], shares_count: int)\
     ]
 
 
-def continue_mpc_helper(request_data, self_db_data, shares_len):
-    processed_request_data = deepcopy(request_data)
-    for_ubic = continue_mpc(processed_request_data, self_db_data)
-
+def continue_mpc_validator(request_data, self_db_data, shares_len, processed_request_data, for_ubic):
     assert len(for_ubic) == len(processed_request_data)
 
     for r, p, u in zip(request_data, processed_request_data, for_ubic):
@@ -57,10 +54,17 @@ def continue_mpc_helper(request_data, self_db_data, shares_len):
             assert web_part == db_part
 
 
-def finalize_mpc_helper(request_data, self_db_data, shares_len):
+def continue_mpc_helper(request_data, self_db_data, shares_len):
     processed_request_data = deepcopy(request_data)
-    finalize_mpc(processed_request_data, self_db_data)
+    for_ubic = continue_mpc(processed_request_data, self_db_data)
+    continue_mpc_validator(request_data,
+                           self_db_data,
+                           shares_len,
+                           processed_request_data,
+                           for_ubic)
 
+
+def finalize_mpc_validator(request_data, self_db_data, shares_len, processed_request_data):
     for r, p in zip(request_data, processed_request_data):
         assert r.hash_id == p.hash_id
         hash_id = r.hash_id
@@ -70,10 +74,24 @@ def finalize_mpc_helper(request_data, self_db_data, shares_len):
             assert db_shares[i] + r.shares[i] == p.shares[i]
 
 
+def finalize_mpc_helper(request_data, self_db_data, shares_len):
+    processed_request_data = deepcopy(request_data)
+    finalize_mpc(processed_request_data, self_db_data)
+    finalize_mpc_validator(request_data, self_db_data, shares_len, processed_request_data)
+
+
 def test_mpc():
+    endpoint_hash_ids = ["", "a", ]
     for self_db_data in self_db_data_sets:
         shares_len = len(self_db_data[drivers_hash_ids[0]])  # lens should be equal
         request_data = get_request_data(drivers_hash_ids, shares_len)
 
         continue_mpc_helper(request_data, self_db_data, shares_len)
         finalize_mpc_helper(request_data, self_db_data, shares_len)
+        for endpoint_hash_id in endpoint_hash_ids:
+            original_request_data = deepcopy(request_data)
+            for_ubic, request_data = mpc_strategy(request_data, self_db_data, endpoint_hash_id)
+            if endpoint_hash_id:
+                continue_mpc_validator(original_request_data, self_db_data, shares_len, request_data, for_ubic)
+            else:
+                finalize_mpc_validator(original_request_data, self_db_data, shares_len, request_data)
