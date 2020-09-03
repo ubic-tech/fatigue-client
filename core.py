@@ -123,6 +123,8 @@ async def common_strategy(headers, req_body, route, data_extractor):
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
         #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
         pass
+    else:
+        next_endpoint_url = ""  # to eliminate warning
 
     for_ubic, req_body.drivers = mpc_strategy(req_body.drivers, self_db_data, next_endpoint_hash_id)
 
