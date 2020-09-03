@@ -17,7 +17,7 @@ aggregator = Aggregator(AggregatorConfig.AGGR_HASH_ID,
 @router.get("/health",
             response_model=ServerResponse,
             response_model_exclude_unset=True)
-def v1_health():
+def health():
     """simple heartbeat"""
     return SUCCESS
 
@@ -25,7 +25,7 @@ def v1_health():
 @router.post("/drivers/fatigue",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
+def drivers_fatigue(drivers_fatigue: DriversFatigue):
     """X-Authorization and X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -55,8 +55,8 @@ def v1_drivers_fatigue(drivers_fatigue: DriversFatigue):
 @router.post("/drivers/online/hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def v1_drivers_online_hourly(request: OnlineHourly,
-                                   x_request_id: str = Header(...)):
+async def drivers_online_hourly(request: OnlineHourly,
+                                x_request_id: str = Header(...)):
     data_extractor = aggregator.drivers_db.get_hourly
     route = "/v1/drivers/online/hourly"
 
@@ -68,8 +68,7 @@ async def v1_drivers_online_hourly(request: OnlineHourly,
 @router.post("/drivers/online/quarter_hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def v1_drivers_online_quarter_hourly(
-        request: OnlineQuarterHourly):
+def drivers_online_quarter_hourly(request: OnlineQuarterHourly):
     print(request)
     return SUCCESS  # exceptions
 
@@ -77,6 +76,6 @@ def v1_drivers_online_quarter_hourly(
 @router.post("/drivers/on_order",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def v1_drivers_on_order(request: OnOrder):
+def drivers_on_order(request: OnOrder):
     print(request)
     return SUCCESS
