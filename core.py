@@ -7,6 +7,11 @@ from db.drivers_repository import DriverID, Share
 
 
 def get_rand_pair(base: int) -> (int, int):
+    """
+    return a pair of random integers so that their sum == base
+    :param base: integer to be splitted into 2 components
+    :return: a pair of base's components
+    """
     seed(datetime.now().microsecond)
     f = randint(1000, 2000)
     s = base - f
@@ -18,6 +23,14 @@ class OperationError(Exception):
 
 
 def get_next_endpoint_hash_id(chain: List[str]) -> str:
+    """
+    Pops AggrConf.AGGR_HASH_ID from the chain
+    the 1st hash ID is expected to be AggrConf.AGGR_HASH_ID
+        raises OperationError if not
+    :param chain: list of endpoints' hash IDs
+    :return: hash ID of an endpoint following after AggrConf.AGGR_HASH_ID
+        or an empty string if does not exist
+    """
     try:  # the 1st hash_id is expected to be 'mine'
         if chain[0] != AggrConf.AGGR_HASH_ID:
             raise OperationError
@@ -32,6 +45,13 @@ def get_next_endpoint_hash_id(chain: List[str]) -> str:
 
 def continue_mpc(request_drivers: List[DriverData],
                  self_db_data: Mapping[DriverID, List[Share]]) -> List[DriverData]:
+    """
+     adds one random number to each of request's shares and
+        one for each hash_id pushes into a returned list
+    :param request_drivers: drivers field from request body
+    :param self_db_data: drivers data extracted with a certain DriverRepository's method
+    :return: list of DriverData with randomly generated shares
+    """
     ubic_drivers_shares = []  # to be sent to UBIC
     for i, driver in enumerate(request_drivers):
         self_shares = self_db_data[driver.hash_id]
@@ -46,6 +66,11 @@ def continue_mpc(request_drivers: List[DriverData],
 
 def finalize_mpc(request_drivers: List[DriverData],
                  self_db_data: Mapping[DriverID, List[Share]]):
+    """
+    adds self_db_data's shares to  request_drivers' shares for each hash_id
+    :param request_drivers: drivers field from request body
+    :param self_db_data: drivers data extracted with a certain DriverRepository's method
+    """
     for i, driver_data in enumerate(request_drivers):  # sum up 'my' shares with received ones
         _id = driver_data.hash_id
         self_shares = self_db_data[_id]
@@ -55,7 +80,17 @@ def finalize_mpc(request_drivers: List[DriverData],
 
 def mpc_strategy(req_body_drivers: List[DriverData],
                  self_db_data: Mapping[DriverID, List[Share]],
-                 next_endpoint_hash_id: str):
+                 next_endpoint_hash_id: str)\
+        -> (List[DriverData], List[DriverData]):
+    """
+    if next_endpoint_hash_id is empty returns finalize_mpc()
+        else returns continue_mpc()
+    :param req_body_drivers: drivers field from request body
+    :param self_db_data: drivers data extracted with a certain DriverRepository's method
+    :param next_endpoint_hash_id: hash ID of an endpoint to forward MPC to
+    :return: a pair of DriverData objects lists containing shares
+        to continue or finalize MPC
+    """
     print("self_db_data: ", self_db_data)  # DBG
 
     if len(next_endpoint_hash_id):
@@ -68,10 +103,18 @@ def mpc_strategy(req_body_drivers: List[DriverData],
         finalize_mpc(req_body_drivers, self_db_data)
         # simply send ubic our share summed with total
         print("forwarding req: ", req_body_drivers)
-        return req_body_drivers, None
+        return req_body_drivers, []
 
 
 async def common_strategy(headers, req_body, route, data_extractor):
+    """
+    organizes strategy of MPC and web request forwarding
+    :param headers: headers from request to be forwarded
+    :param req_body: request's data body (JSON is expected)
+    :param route: url specifying the MPC destination
+    :param data_extractor: data extraction method appropriate for
+        current MPC destination
+    """
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
     ts = timestamp_to_datetime(req_body.timestamp)
 
