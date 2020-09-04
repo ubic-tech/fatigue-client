@@ -75,8 +75,7 @@ def finalize_mpc_validator(request_data, self_db_data, shares_count, processed_r
 
 
 def finalize_mpc_helper(request_data, self_db_data, shares_count):
-    processed_request_data = deepcopy(request_data)
-    finalize_mpc(processed_request_data, self_db_data)
+    processed_request_data = finalize_mpc(request_data, self_db_data)
     finalize_mpc_validator(request_data, self_db_data, shares_count, processed_request_data)
 
 

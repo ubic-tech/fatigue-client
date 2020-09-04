@@ -4,6 +4,7 @@ from config import AggregatorConfig as AggrConf
 from models.models import DriverData
 from typing import List, Mapping
 from db.drivers_repository import DriverID, Share
+from copy import deepcopy
 
 
 def get_rand_pair(base: int) -> (int, int):
@@ -65,17 +66,23 @@ def continue_mpc(request_drivers: List[DriverData],
 
 
 def finalize_mpc(request_drivers: List[DriverData],
-                 self_db_data: Mapping[DriverID, List[Share]]):
+                 self_db_data: Mapping[DriverID, List[Share]])\
+        -> List[DriverData]:
     """
-    adds self_db_data's shares to  request_drivers' shares for each hash_id
+    adds self_db_data's shares to request_drivers' shares for each hash_id
     :param request_drivers: drivers field from request body
-    :param self_db_data: drivers data extracted with a certain DriverRepository's method
+    :param self_db_data: drivers data extracted with
+        a certain DriverRepository's method
+    :return list of DriverData objects so that for each hash ID
+        each share from request_drivers summed with those from self_db_data
     """
-    for i, driver_data in enumerate(request_drivers):  # sum up 'my' shares with received ones
+    res = deepcopy(request_drivers)
+    for i, driver_data in enumerate(res):  # sum up 'my' shares with received ones
         _id = driver_data.hash_id
         self_shares = self_db_data[_id]
         for j, share in enumerate(self_shares):  # common shares += "my" shares gotten by hash_id
-            request_drivers[i].shares[j] += self_shares[j]
+            res[i].shares[j] += self_shares[j]
+    return res
 
 
 def mpc_strategy(req_body_drivers: List[DriverData],
@@ -100,10 +107,10 @@ def mpc_strategy(req_body_drivers: List[DriverData],
         print("forwarding req: ", req_body_drivers)  # DBG
         return ubic_drivers_shares, req_body_drivers
     else:
-        finalize_mpc(req_body_drivers, self_db_data)
-        # simply send ubic our share summed with total
+        for_ubic = finalize_mpc(req_body_drivers, self_db_data)
+        # simply our share summed with total
         print("forwarding req: ", req_body_drivers)
-        return req_body_drivers, []
+        return for_ubic, []
 
 
 async def common_strategy(headers, req_body, route, data_extractor):
