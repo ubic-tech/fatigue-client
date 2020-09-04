@@ -55,8 +55,7 @@ def continue_mpc_validator(request_data, self_db_data, shares_count, processed_r
 
 
 def continue_mpc_helper(request_data, self_db_data, shares_count):
-    processed_request_data = deepcopy(request_data)
-    for_ubic = continue_mpc(processed_request_data, self_db_data)
+    for_ubic, processed_request_data = continue_mpc(request_data, self_db_data)
     continue_mpc_validator(request_data,
                            self_db_data,
                            shares_count,

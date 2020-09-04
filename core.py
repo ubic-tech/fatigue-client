@@ -45,24 +45,27 @@ def get_next_endpoint_hash_id(chain: List[str]) -> str:
 
 
 def continue_mpc(request_drivers: List[DriverData],
-                 self_db_data: Mapping[DriverID, List[Share]]) -> List[DriverData]:
+                 self_db_data: Mapping[DriverID, List[Share]])\
+        -> (List[DriverData], List[DriverData]):
     """
      adds one random number to each of request's shares and
         one for each hash_id pushes into a returned list
     :param request_drivers: drivers field from request body
     :param self_db_data: drivers data extracted with a certain DriverRepository's method
-    :return: list of DriverData with randomly generated shares
+    :return: 2 lists of DriverData with randomly generated shares
+        one to be handled by Ubic the other to be handled by the next Endpoint
     """
     ubic_drivers_shares = []  # to be sent to UBIC
-    for i, driver in enumerate(request_drivers):
+    common_driver_shares = deepcopy(request_drivers)
+    for i, driver in enumerate(common_driver_shares):
         self_shares = self_db_data[driver.hash_id]
         ubic_driver_data = DriverData(hash_id=driver.hash_id, shares=[])  # to be appended to ubic_drivers_shares
         for j, share in enumerate(self_shares):
             for_ubic, for_common = get_rand_pair(int(share))  # for_ubic + for_common == share
             ubic_driver_data.shares.append(for_ubic)
-            request_drivers[i].shares[j] += for_common  # add 'my' share summed up with common
+            common_driver_shares[i].shares[j] += for_common  # add 'my' share summed up with common
         ubic_drivers_shares.append(ubic_driver_data)
-    return ubic_drivers_shares
+    return ubic_drivers_shares, common_driver_shares
 
 
 def finalize_mpc(request_drivers: List[DriverData],
@@ -101,16 +104,15 @@ def mpc_strategy(req_body_drivers: List[DriverData],
     print("self_db_data: ", self_db_data)  # DBG
 
     if len(next_endpoint_hash_id):
-        ubic_drivers_shares = continue_mpc(req_body_drivers, self_db_data)
-
-        print("ubic_drivers_shares: ", ubic_drivers_shares)  # DBG
-        print("forwarding req: ", req_body_drivers)  # DBG
-        return ubic_drivers_shares, req_body_drivers
+        u, c = continue_mpc(req_body_drivers, self_db_data)  # DBG
+        print("ubic_drivers_shares: ", u)  # DBG
+        print("forwarding req: ", c)  # DBG
+        return continue_mpc(req_body_drivers, self_db_data)
     else:
-        for_ubic = finalize_mpc(req_body_drivers, self_db_data)
+        u = finalize_mpc(req_body_drivers, self_db_data)  # DBG
         # simply our share summed with total
-        print("forwarding req: ", req_body_drivers)
-        return for_ubic, []
+        print("forwarding req: ", u)
+        return finalize_mpc(req_body_drivers, self_db_data), []
 
 
 async def common_strategy(headers, req_body, route, data_extractor):
