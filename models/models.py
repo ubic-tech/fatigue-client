@@ -35,7 +35,7 @@ class OnlineQuarterHourly(OnlineHourly):
 
 
 class OnOrder(OnlineHourly):
-    pass
+    start: str
 
 
 class DriverFatigue(BaseModel):
