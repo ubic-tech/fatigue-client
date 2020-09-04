@@ -115,7 +115,7 @@ def mpc_strategy(req_body_drivers: List[DriverData],
         return finalize_mpc(req_body_drivers, self_db_data), []
 
 
-async def common_strategy(headers, req_body, route, data_extractor):
+async def common_strategy(headers, req_body, route, data_extractor, *data_extractor_params):
     """
     organizes strategy of MPC and web request forwarding
     :param headers: headers from request to be forwarded
@@ -128,7 +128,7 @@ async def common_strategy(headers, req_body, route, data_extractor):
     ts = timestamp_to_datetime(req_body.timestamp)
 
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
-    self_db_data = data_extractor(ts, drivers_hash_ids)  # Mapping[DriverID, Share]
+    self_db_data = data_extractor(ts, drivers_hash_ids, *data_extractor_params)  # Mapping[DriverID, Share]
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
         #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
         pass

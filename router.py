@@ -4,6 +4,7 @@ from db.clickhouse_repository import ClickhouseRepository
 from aggregator import Aggregator
 from core import common_strategy
 from config import AggregatorConfig
+from common.utils import timestamp_to_datetime
 
 
 ERROR = {'code': "503", 'message': "NOT OK"}
@@ -25,7 +26,7 @@ def health():
 @router.post("/drivers/fatigue",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def drivers_fatigue(drivers_fatigue: DriversFatigue):
+def drivers_fatigue(request: DriversFatigue):
     """X-Authorization and X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -48,7 +49,7 @@ def drivers_fatigue(drivers_fatigue: DriversFatigue):
         какую реакцию запрогить?
         эмулировать блокировку как-то так: self.drivers[hash_id].block()?
         """
-    print(drivers_fatigue)
+    print(request)
     return SUCCESS
 
 
@@ -77,5 +78,6 @@ def drivers_online_quarter_hourly(request: OnlineQuarterHourly):
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 def drivers_on_order(request: OnOrder):
+    start = timestamp_to_datetime(request.start)
     print(request)
     return SUCCESS

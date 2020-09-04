@@ -14,7 +14,8 @@ class DriversRepository(ABC):
 
     @abstractmethod
     def get_on_order(self, ts: datetime,
-                     drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
+                     drivers: Iterable[DriverID],
+                     start: datetime) -> Mapping[DriverID, Iterable[Share]]:
         pass
 
     @abstractmethod

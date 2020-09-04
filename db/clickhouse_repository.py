@@ -58,7 +58,8 @@ class ClickhouseRepository(DriversRepository):
         return self.make_dict(self._get_hourly(ts, drivers))
     
     def get_on_order(self, ts: datetime,
-                     drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
+                     drivers: Iterable[DriverID],
+                     start: datetime) -> Mapping[DriverID, Iterable[Share]]:
         return self.make_dict(self._get_hourly(ts, drivers), norm=False)
     
     def get_quarter_hourly(self, ts: datetime,
