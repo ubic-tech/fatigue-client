@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from core import OperationError
 from starlette.responses import JSONResponse
-from router import router
+from router import router, PREFIX_URL
 from config import AggregatorConfig
 
 #  uvicorn main:app  --port 8080
@@ -15,7 +15,7 @@ async def attribute_exists(request, exc):
 
 app.include_router(
     router,
-    prefix="/v1"
+    prefix=PREFIX_URL
 )
 
 
