@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from core import OperationError
 from starlette.responses import JSONResponse
 from router import router
+from config import AggregatorConfig
 
 #  uvicorn main:app  --port 8080
 app = FastAPI()
@@ -20,9 +21,11 @@ app.include_router(
 
 @app.on_event("startup")
 async def init_app():
-    pass
+    print(AggregatorConfig.AGGR_NAME, " started, hash id == ",
+          AggregatorConfig.AGGR_HASH_ID)
 
 
 @app.on_event("shutdown")
 async def close_app():
-    pass
+    print(AggregatorConfig.AGGR_NAME, " finished, hash id == ",
+          AggregatorConfig.AGGR_HASH_ID)
