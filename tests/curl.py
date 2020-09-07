@@ -44,11 +44,11 @@ async def test_drivers_on_order():
 
 async def all_tests():
     tests = [
-        #test_v1_health,
+        test_v1_health,
         #test_drivers_fatigue,
         test_drivers_online_hour_start,
         test_drivers_online_hour_final,
-        #test_drivers_online_quarter_hourly,
+        test_drivers_online_quarter_hourly,
         #test_drivers_on_order,
     ]
 
