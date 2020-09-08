@@ -1,17 +1,20 @@
 from fastapi import Header, APIRouter
 from models.models import *
 from db.clickhouse_repository import ClickhouseRepository
-from aggregator import Aggregator
 from core import common_strategy
-from config import AggregatorConfig
+from config import AggregatorConfig as Aggr
 from common.utils import timestamp_to_datetime
+
+# db -> repository
+#  routers -> drivers.py
+# delete prefix "driver"
+# aggr --
+# row DB ++
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
-aggregator = Aggregator(AggregatorConfig.AGGR_HASH_ID,
-                        ClickhouseRepository(AggregatorConfig.CLICK_HOUSE_URL,
-                                             AggregatorConfig.AGGR_NAME))
+db = ClickhouseRepository(Aggr.CLICK_HOUSE_URL, Aggr.AGGR_NAME)
 
 PREFIX_URL = "/v1"
 
@@ -59,20 +62,25 @@ def drivers_fatigue(request: DriversFatigue):
              response_model_exclude_unset=True)
 async def drivers_online_hourly(request: OnlineHourly,
                                 x_request_id: str = Header(...)):
-    data_extractor = aggregator.drivers_db.get_hourly
+    data_extractor = db.get_hourly
     route = PREFIX_URL + "/drivers/online/hourly"
 
     headers = {"X-Request-Id": x_request_id, }
-    await common_strategy(headers, request, route, data_extractor)
+    await common_strategy(headers,
+                          request,
+                          route,
+                          data_extractor)
     return SUCCESS
 
 
+# headers to single param
+# routing from request
 @router.post("/drivers/online/quarter_hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def drivers_online_quarter_hourly(request: OnlineQuarterHourly,
                                         x_request_id: str = Header(...)):
-    data_extractor = aggregator.drivers_db.get_quarter_hourly
+    data_extractor = db.get_quarter_hourly
     route = PREFIX_URL + "/drivers/online/quarter_hourly"
     headers = {"X-Request-Id": x_request_id, }
     await common_strategy(headers, request, route, data_extractor)
@@ -86,7 +94,7 @@ async def drivers_online_quarter_hourly(request: OnlineQuarterHourly,
 async def drivers_on_order(request: OnOrder,
                            x_request_id: str = Header(...)):
     start = timestamp_to_datetime(request.start)
-    data_extractor = aggregator.drivers_db.get_on_order
+    data_extractor = db.get_on_order
     route = PREFIX_URL + "/drivers/on_order"
     headers = {"X-Request-Id": x_request_id, }
     await common_strategy(headers, request, route, data_extractor, start)

@@ -114,7 +114,9 @@ def mpc_strategy(req_body_drivers: List[DriverData],
         print("forwarding req: ", u)
         return finalize_mpc(req_body_drivers, self_db_data), []
 
-
+#  rename -> compute
+#  pull it out to file
+# return data and await to router
 async def common_strategy(headers, req_body, route, data_extractor, *data_extractor_params):
     """
     organizes strategy of MPC and web request forwarding
