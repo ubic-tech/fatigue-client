@@ -1,4 +1,4 @@
-from common.config import env_config
+from utils.config import env_config
 from hashlib import sha256
 
 

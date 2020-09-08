@@ -3,7 +3,7 @@ from models.models import *
 from repository.clickhouse_repository import ClickhouseRepository
 from mpc.mpc import compute
 from config import AggregatorConfig as AggrConf
-from common.utils import timestamp_to_datetime, request, OperationError
+from utils.utils import timestamp_to_datetime, request, OperationError
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
