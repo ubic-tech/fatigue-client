@@ -1,6 +1,5 @@
 from random import randint, seed
 from common.utils import *
-from config import AggregatorConfig as AggrConf
 from models.models import DriverData
 from typing import List, Mapping
 from repository.drivers_repository import DriverID, Share
