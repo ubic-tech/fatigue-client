@@ -1,8 +1,9 @@
-from mpc.mpc import get_next_endpoint_hash_id, OperationError
+from routers.drivers import get_next_endpoint_hash_id, OperationError
 from copy import deepcopy
 
 
 MY_HASH_ID = "MY_HASH"
+
 
 def test_positive():
     sets = [

@@ -1,3 +1,5 @@
+from sys import maxsize
+
 from random import randint, seed
 from common.utils import *
 from models.models import DriverData
@@ -12,8 +14,7 @@ def get_rand_pair(base: int) -> (int, int):
     :param base: integer to be splitted into 2 components
     :return: a pair of base's components
     """
-    seed(datetime.now().microsecond)
-    f = randint(1000, 2000)
+    f = randint(-maxsize, maxsize)
     s = base - f
     return (f, s) if randint(0, 1) else (s, f)
 
@@ -61,7 +62,7 @@ def finalize_mpc(request_drivers: List[DriverData],
             res[i].shares[j] += my_shares[j]
     return res
 
-
+# TODO rename to compute
 def mpc(req_body_drivers: List[DriverData],
         my_db_data: Mapping[DriverID, List[Share]],
         next_endpoint_hash_id: str) -> (List[DriverData], List[DriverData]):

@@ -3,6 +3,9 @@ from mpc.mpc import OperationError
 from starlette.responses import JSONResponse
 from routers.drivers import router, PREFIX_URL
 from config import AggregatorConfig
+from datetime import datetime
+from random import seed
+
 
 #  uvicorn main:app  --port 8080
 app = FastAPI()
@@ -21,6 +24,7 @@ app.include_router(
 
 @app.on_event("startup")
 async def init_app():
+    seed(datetime.now().microsecond)
     print(AggregatorConfig.AGGR_NAME, " started, hash id == ",
           AggregatorConfig.AGGR_HASH_ID)
 

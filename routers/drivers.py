@@ -3,11 +3,7 @@ from models.models import *
 from repository.clickhouse_repository import ClickhouseRepository
 from mpc.mpc import mpc
 from config import AggregatorConfig as AggrConf
-from common.utils import (
-    timestamp_to_datetime,
-    get_next_endpoint_hash_id,
-    get_endpoint_url_by_hash,
-)
+from common.utils import timestamp_to_datetime, request, OperationError
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
@@ -18,7 +14,39 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
 PREFIX_URL = "/v1"
 
 
-async def compute(x_request_id, req_body, path, data_extractor,
+# cacheble
+async def get_endpoint_url_by_hash(hash_id) -> str:
+    route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
+    resp = await request(route, json={"identifiers": [hash_id, ]})
+    resp = {'data': 'anything'}
+    if resp is None:
+        pass  # todo: validate
+    return EndpointResponse(**resp).endpoints[0].endpoint
+
+
+def get_next_endpoint_hash_id(chain: List[str], my_hash_id: str) -> str:
+    """
+    Pops AggrConf.AGGR_HASH_ID from the chain
+    the 1st hash ID is expected to be AggrConf.AGGR_HASH_ID
+        raises OperationError if not
+    :param chain: list of endpoints' hash IDs
+    :param my_hash_id: this aggregator's hash ID
+    :return: hash ID of an endpoint following after AggrConf.AGGR_HASH_ID
+        or an empty string if does not exist
+    """
+    try:  # the 1st hash_id is expected to be 'mine'
+        if chain[0] != my_hash_id:
+            raise OperationError
+    except IndexError:
+        raise OperationError
+    chain.pop(0)  # pop 'my' hash_id
+    try:  # try getting next aggr in chain
+        return chain[0]  # return the next endpoint's hash_id
+    except IndexError:  # means 'I' am the last aggregator in the chain
+        return ""
+
+
+async def process(x_request_id, req_body, path, data_extractor,
                   *data_extractor_params):
     """
         organizes strategy of MPC and web request forwarding
@@ -67,7 +95,7 @@ def health():
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 def fatigue(drivers: DriversFatigue,
-            request: Request):
+            raw_request: Request):
     """X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -90,8 +118,8 @@ def fatigue(drivers: DriversFatigue,
         какую реакцию запрогить?
         эмулировать блокировку как-то так: my.drivers[hash_id].block()?
         """
-    print(request.headers)  # DBG
-    print(request.url.path)  # DBG
+    print(raw_request.headers)  # DBG
+    print(raw_request.url.path)  # DBG
     print(drivers)  # DBG
     return SUCCESS
 
@@ -100,11 +128,11 @@ def fatigue(drivers: DriversFatigue,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def online_hourly(online_hourly_data: OnlineHourly,
-                        request: Request,
+                        raw_request: Request,
                         x_request_id: str = Header(...)):
-    return await compute(x_request_id,
+    return await process(x_request_id,
                          online_hourly_data,
-                         request.url.path,
+                         raw_request.url.path,
                          db.get_hourly)
 
 
@@ -112,11 +140,11 @@ async def online_hourly(online_hourly_data: OnlineHourly,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
-                                request: Request,
+                                raw_request: Request,
                                 x_request_id: str = Header(...)):
-    return await compute(x_request_id,
+    return await process(x_request_id,
                          online_quarter_hourly_data,
-                         request.url.path,
+                         raw_request.url.path,
                          db.get_quarter_hourly)
 
 
@@ -124,10 +152,10 @@ async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def on_order(on_order_data: OnOrder,
-                   request: Request,
+                   raw_request: Request,
                    x_request_id: str = Header(...)):
-    return await compute(x_request_id,
+    return await process(x_request_id,
                          on_order_data,
-                         request.url.path,
+                         raw_request.url.path,
                          db.get_on_order,
                          timestamp_to_datetime(on_order_data.start))
