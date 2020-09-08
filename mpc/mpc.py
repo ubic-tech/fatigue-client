@@ -19,31 +19,6 @@ def get_rand_pair(base: int) -> (int, int):
     return (f, s) if randint(0, 1) else (s, f)
 
 
-class OperationError(Exception):
-    pass
-
-
-def get_next_endpoint_hash_id(chain: List[str]) -> str:
-    """
-    Pops AggrConf.AGGR_HASH_ID from the chain
-    the 1st hash ID is expected to be AggrConf.AGGR_HASH_ID
-        raises OperationError if not
-    :param chain: list of endpoints' hash IDs
-    :return: hash ID of an endpoint following after AggrConf.AGGR_HASH_ID
-        or an empty string if does not exist
-    """
-    try:  # the 1st hash_id is expected to be 'mine'
-        if chain[0] != AggrConf.AGGR_HASH_ID:
-            raise OperationError
-    except IndexError:
-        raise OperationError
-    chain.pop(0)  # pop 'my' hash_id
-    try:  # try getting next aggr in chain
-        return chain[0]  # return the next endpoint's hash_id
-    except IndexError:  # means 'I' am the last aggregator in the chain
-        return ""
-
-
 def continue_mpc(request_drivers: List[DriverData],
                  self_db_data: Mapping[DriverID, List[Share]]) \
         -> (List[DriverData], List[DriverData]):
@@ -112,38 +87,3 @@ def compute(req_body_drivers: List[DriverData],
         # simply our share summed with total
         print("forwarding req: ", u)
         return finalize_mpc(req_body_drivers, self_db_data), []
-
-
-#  rename -> compute
-#  pull it out to file
-# return data and await to router
-async def common_strategy(headers, req_body, route, data_extractor, *data_extractor_params):
-    """
-    organizes strategy of MPC and web request forwarding
-    :param headers: headers from request to be forwarded
-    :param req_body: request's data body (JSON is expected)
-    :param route: url specifying the MPC destination
-    :param data_extractor: data extraction method appropriate for
-        current MPC destination
-    """
-    ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
-    ts = timestamp_to_datetime(req_body.timestamp)
-
-    drivers_hash_ids = [d.hash_id for d in req_body.drivers]
-    self_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
-    if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
-        # next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
-        pass
-    else:
-        next_endpoint_url = ""  # to eliminate warning
-
-    for_ubic, req_body.drivers = compute(req_body.drivers, self_db_data, next_endpoint_hash_id)
-
-    print("\n\n")
-    return
-    if next_endpoint_hash_id:
-        await request(next_endpoint_url + route, headers=headers, json=req_body)
-        await request(ubic_shares_route, headers=headers, json=for_ubic)
-    else:
-        req_body.drivers = for_ubic
-        await request(ubic_shares_route, headers=headers, json=req_body)

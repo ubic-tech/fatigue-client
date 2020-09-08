@@ -1,16 +1,17 @@
 from mpc.mpc import get_next_endpoint_hash_id, OperationError
-from config import AggregatorConfig as AggrConf
 from copy import deepcopy
 
 
+MY_HASH_ID = "MY_HASH"
+
 def test_positive():
     sets = [
-        [AggrConf.AGGR_HASH_ID, "OK", "FAIL", "FAIL", "FAIL", ],
-        [AggrConf.AGGR_HASH_ID, "OK", "FAIL", ],
-        [AggrConf.AGGR_HASH_ID, "OK", ],
+        [MY_HASH_ID, "OK", "FAIL", "FAIL", "FAIL", ],
+        [MY_HASH_ID, "OK", "FAIL", ],
+        [MY_HASH_ID, "OK", ],
     ]
     for i, s in enumerate(deepcopy(sets)):
-        assert get_next_endpoint_hash_id(s) == "OK"
+        assert get_next_endpoint_hash_id(s, MY_HASH_ID) == "OK"
         assert s == sets[i][1:]  # testing popping
 
 
@@ -22,7 +23,7 @@ def test_self_not_found():
     ]
     for s in sets:
         try:
-            get_next_endpoint_hash_id(s)
+            get_next_endpoint_hash_id(s, MY_HASH_ID)
             assert False
         except OperationError:
             assert True
@@ -30,8 +31,8 @@ def test_self_not_found():
 
 def test_self_last():
     sets = [
-        [AggrConf.AGGR_HASH_ID, ],
+        [MY_HASH_ID, ],
     ]
     for s in sets:
-        assert get_next_endpoint_hash_id(s) == ""
+        assert get_next_endpoint_hash_id(s, MY_HASH_ID) == ""
         assert s == []

@@ -3,7 +3,33 @@ from re import search, findall, sub
 from config import AggregatorConfig
 from models.models import EndpointResponse
 from datetime import datetime, date, time
+from typing import List
 
+
+class OperationError(Exception):
+    pass
+
+
+def get_next_endpoint_hash_id(chain: List[str], my_hash_id: str) -> str:
+    """
+    Pops AggrConf.AGGR_HASH_ID from the chain
+    the 1st hash ID is expected to be AggrConf.AGGR_HASH_ID
+        raises OperationError if not
+    :param chain: list of endpoints' hash IDs
+    :param my_hash_id: this aggregator's hash ID
+    :return: hash ID of an endpoint following after AggrConf.AGGR_HASH_ID
+        or an empty string if does not exist
+    """
+    try:  # the 1st hash_id is expected to be 'mine'
+        if chain[0] != my_hash_id:
+            raise OperationError
+    except IndexError:
+        raise OperationError
+    chain.pop(0)  # pop 'my' hash_id
+    try:  # try getting next aggr in chain
+        return chain[0]  # return the next endpoint's hash_id
+    except IndexError:  # means 'I' am the last aggregator in the chain
+        return ""
 
 class StatusError(Exception):
     pass
