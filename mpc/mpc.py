@@ -1,7 +1,7 @@
 from sys import maxsize
 
 from random import randint
-from models.models import DriverData
+from models.drivers import DriverData
 from typing import List, Mapping
 from repository.drivers_repository import DriverID, Share
 from copy import deepcopy

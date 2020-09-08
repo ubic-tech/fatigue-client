@@ -1,5 +1,5 @@
 from fastapi import Header, APIRouter, Request
-from models.models import *
+from models.drivers import *
 from repository.clickhouse_repository import ClickhouseRepository
 from mpc.mpc import compute
 from config import AggregatorConfig as AggrConf
