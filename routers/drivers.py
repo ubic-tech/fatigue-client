@@ -9,7 +9,6 @@ from common.utils import (
     get_endpoint_url_by_hash,
 )
 
-
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
@@ -19,8 +18,8 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
 PREFIX_URL = "/v1"
 
 
-async def common_strategy(headers, req_body, route, data_extractor,
-                          *data_extractor_params):
+async def compute(headers, req_body, route, data_extractor,
+                  *data_extractor_params):
     """
         organizes strategy of MPC and web request forwarding
         :param headers: headers from request to be forwarded
@@ -100,10 +99,10 @@ async def online_hourly(request: OnlineHourly,
     route = PREFIX_URL + "/drivers/online/hourly"
 
     headers = {"X-Request-Id": x_request_id, }
-    await common_strategy(headers,
-                          request,
-                          route,
-                          data_extractor)
+    await compute(headers,
+                  request,
+                  route,
+                  data_extractor)
     return SUCCESS
 
 
@@ -117,7 +116,7 @@ async def online_quarter_hourly(request: OnlineQuarterHourly,
     data_extractor = db.get_quarter_hourly
     route = PREFIX_URL + "/drivers/online/quarter_hourly"
     headers = {"X-Request-Id": x_request_id, }
-    await common_strategy(headers, request, route, data_extractor)
+    await compute(headers, request, route, data_extractor)
     print(request)  # DBG
     return SUCCESS
 
@@ -131,6 +130,6 @@ async def on_order(request: OnOrder,
     data_extractor = db.get_on_order
     route = PREFIX_URL + "/drivers/on_order"
     headers = {"X-Request-Id": x_request_id, }
-    await common_strategy(headers, request, route, data_extractor, start)
+    await compute(headers, request, route, data_extractor, start)
     print(request)  # DBG
     return SUCCESS
