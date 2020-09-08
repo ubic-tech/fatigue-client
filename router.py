@@ -89,6 +89,6 @@ async def drivers_on_order(request: OnOrder,
     data_extractor = aggregator.drivers_db.get_on_order
     route = PREFIX_URL + "/drivers/on_order"
     headers = {"X-Request-Id": x_request_id, }
-    # await common_strategy(headers, request, route, data_extractor, start)
+    await common_strategy(headers, request, route, data_extractor, start)
     print(request)  # DBG
     return SUCCESS
