@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from typing import Mapping, Iterable
+
 from clickhouse_driver import Client
 from repository.drivers_repository import DriverID, Share, DriversRepository
 

@@ -1,7 +1,9 @@
-from common.utils import request, StatusError
-from tests.curl_data import *
 from json import dumps
+
 import asyncio
+
+from utils.utils import request, StatusError
+from tests.curl_data import *
 
 url = "http://127.0.0.1:8080"
 

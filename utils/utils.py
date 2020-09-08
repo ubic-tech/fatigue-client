@@ -1,6 +1,7 @@
-import aiohttp
 from re import search, findall, sub
 from datetime import datetime, date, time
+
+import aiohttp
 
 
 class OperationError(Exception):

@@ -1,10 +1,11 @@
 from sys import maxsize
-
-from random import randint
-from models.drivers import DriverData
-from typing import List, Mapping
-from repository.drivers_repository import DriverID, Share
 from copy import deepcopy
+from random import randint
+
+from typing import List, Mapping
+
+from repository.drivers_repository import DriverID, Share
+from models.drivers import DriverData
 
 
 def get_rand_pair(base: int) -> (int, int):
