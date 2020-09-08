@@ -45,7 +45,7 @@ def get_next_endpoint_hash_id(chain: List[str]) -> str:
 
 
 def continue_mpc(request_drivers: List[DriverData],
-                 self_db_data: Mapping[DriverID, List[Share]])\
+                 self_db_data: Mapping[DriverID, List[Share]]) \
         -> (List[DriverData], List[DriverData]):
     """
      adds one random number to each of request's shares and
@@ -69,7 +69,7 @@ def continue_mpc(request_drivers: List[DriverData],
 
 
 def finalize_mpc(request_drivers: List[DriverData],
-                 self_db_data: Mapping[DriverID, List[Share]])\
+                 self_db_data: Mapping[DriverID, List[Share]]) \
         -> List[DriverData]:
     """
     adds self_db_data's shares to request_drivers' shares for each hash_id
@@ -88,10 +88,9 @@ def finalize_mpc(request_drivers: List[DriverData],
     return res
 
 
-def mpc_strategy(req_body_drivers: List[DriverData],
-                 self_db_data: Mapping[DriverID, List[Share]],
-                 next_endpoint_hash_id: str)\
-        -> (List[DriverData], List[DriverData]):
+def compute(req_body_drivers: List[DriverData],
+            self_db_data: Mapping[DriverID, List[Share]],
+            next_endpoint_hash_id: str) -> (List[DriverData], List[DriverData]):
     """
     if next_endpoint_hash_id is empty returns finalize_mpc()
         else returns continue_mpc()
@@ -114,6 +113,7 @@ def mpc_strategy(req_body_drivers: List[DriverData],
         print("forwarding req: ", u)
         return finalize_mpc(req_body_drivers, self_db_data), []
 
+
 #  rename -> compute
 #  pull it out to file
 # return data and await to router
@@ -132,12 +132,12 @@ async def common_strategy(headers, req_body, route, data_extractor, *data_extrac
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     self_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
-        #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
+        # next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
         pass
     else:
         next_endpoint_url = ""  # to eliminate warning
 
-    for_ubic, req_body.drivers = mpc_strategy(req_body.drivers, self_db_data, next_endpoint_hash_id)
+    for_ubic, req_body.drivers = compute(req_body.drivers, self_db_data, next_endpoint_hash_id)
 
     print("\n\n")
     return

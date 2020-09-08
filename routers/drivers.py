@@ -61,7 +61,7 @@ def fatigue(request: DriversFatigue):
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def online_hourly(request: OnlineHourly,
-                                x_request_id: str = Header(...)):
+                        x_request_id: str = Header(...)):
     data_extractor = db.get_hourly
     route = PREFIX_URL + "/drivers/online/hourly"
 
@@ -79,7 +79,7 @@ async def online_hourly(request: OnlineHourly,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def online_quarter_hourly(request: OnlineQuarterHourly,
-                                        x_request_id: str = Header(...)):
+                                x_request_id: str = Header(...)):
     data_extractor = db.get_quarter_hourly
     route = PREFIX_URL + "/drivers/online/quarter_hourly"
     headers = {"X-Request-Id": x_request_id, }
@@ -92,7 +92,7 @@ async def online_quarter_hourly(request: OnlineQuarterHourly,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def on_order(request: OnOrder,
-                           x_request_id: str = Header(...)):
+                   x_request_id: str = Header(...)):
     start = timestamp_to_datetime(request.start)
     data_extractor = db.get_on_order
     route = PREFIX_URL + "/drivers/on_order"
