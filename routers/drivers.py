@@ -1,7 +1,7 @@
 from fastapi import Header, APIRouter
 from models.models import *
 from repository.clickhouse_repository import ClickhouseRepository
-from core import common_strategy
+from mpc.mpc import common_strategy
 from config import AggregatorConfig as Aggr
 from common.utils import timestamp_to_datetime
 

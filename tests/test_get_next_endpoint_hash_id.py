@@ -1,4 +1,4 @@
-from core import get_next_endpoint_hash_id, OperationError
+from mpc.mpc import get_next_endpoint_hash_id, OperationError
 from config import AggregatorConfig as AggrConf
 from copy import deepcopy
 

@@ -1,6 +1,6 @@
 from hypothesis import given
 import hypothesis.strategies as st
-from core import get_rand_pair
+from mpc.mpc import get_rand_pair
 
 
 @given(st.integers())

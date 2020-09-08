@@ -1,4 +1,4 @@
-from core import continue_mpc, finalize_mpc, mpc_strategy
+from mpc.mpc import continue_mpc, finalize_mpc, mpc_strategy
 from models.models import DriverData
 from random import randint, seed
 from datetime import datetime
