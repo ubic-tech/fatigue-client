@@ -8,22 +8,25 @@ Share = int
 
 class DriversRepository(ABC):
     @abstractmethod
-    def get_hourly(self, ts: datetime,
-                   drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
+    def get_hourly(self,
+                   drivers: Iterable[DriverID],
+                   start: datetime) -> Mapping[DriverID, Iterable[Share]]:
         pass
 
     @abstractmethod
-    def get_on_order(self, ts: datetime,
+    def get_on_order(self,
                      drivers: Iterable[DriverID],
-                     start: datetime) -> Mapping[DriverID, Iterable[Share]]:
+                     start: datetime, end: datetime) -> Mapping[DriverID, Iterable[Share]]:
         pass
 
     @abstractmethod
-    def get_quarter_hourly(self, ts: datetime,
-                           drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
+    def get_quarter_hourly(self,
+                           drivers: Iterable[DriverID],
+                           start: datetime) -> Mapping[DriverID, Iterable[Share]]:
         pass
 
     @abstractmethod
-    def get_history_hourly(self, ts: datetime,
-                           drivers: Iterable[DriverID]) -> Mapping[DriverID, Iterable[Share]]:
+    def get_history_hourly(self,
+                           drivers: Iterable[DriverID],
+                           start: datetime) -> Mapping[DriverID, Iterable[Share]]:
         pass

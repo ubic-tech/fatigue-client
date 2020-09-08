@@ -128,7 +128,7 @@ async def common_strategy(headers, req_body, route, data_extractor, *data_extrac
     ts = timestamp_to_datetime(req_body.timestamp)
 
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
-    self_db_data = data_extractor(ts, drivers_hash_ids, *data_extractor_params)  # Mapping[DriverID, Share]
+    self_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain):
         #next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
         pass
