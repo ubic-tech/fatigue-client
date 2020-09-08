@@ -1,13 +1,9 @@
+from hypothesis import given
+import hypothesis.strategies as st
 from core import get_rand_pair
 
 
-def test():
-    data = [0, 1, 2, -5, 100100, 343434343434, -28324234,
-            -738, 9230, 273, 2020, 455, 90, -77, -45, 6,
-            -1, -100, - 10000, -1000000, 10000000000000,
-            -82, 7484, -343, 8920, -888, -333, 2, -1111,
-            45672839876562436789002038765642783902837663,
-            -4567892387656789238765678924876234517386265]
-    for d in data:
-        f, s = get_rand_pair(int(d))
-        assert f + s == d
+@given(st.integers())
+def test_get_rand_pair(number: int):
+    f, s = get_rand_pair(number)
+    assert f + s == number
