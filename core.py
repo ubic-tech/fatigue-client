@@ -3,7 +3,7 @@ from common.utils import *
 from config import AggregatorConfig as AggrConf
 from models.models import DriverData
 from typing import List, Mapping
-from db.drivers_repository import DriverID, Share
+from repository.drivers_repository import DriverID, Share
 from copy import deepcopy
 
 
