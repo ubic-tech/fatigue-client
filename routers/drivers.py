@@ -30,7 +30,7 @@ def health():
 @router.post("/drivers/fatigue",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def drivers_fatigue(request: DriversFatigue):
+def fatigue(request: DriversFatigue):
     """X-Authorization and X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -60,7 +60,7 @@ def drivers_fatigue(request: DriversFatigue):
 @router.post("/drivers/online/hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def drivers_online_hourly(request: OnlineHourly,
+async def online_hourly(request: OnlineHourly,
                                 x_request_id: str = Header(...)):
     data_extractor = db.get_hourly
     route = PREFIX_URL + "/drivers/online/hourly"
@@ -78,7 +78,7 @@ async def drivers_online_hourly(request: OnlineHourly,
 @router.post("/drivers/online/quarter_hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def drivers_online_quarter_hourly(request: OnlineQuarterHourly,
+async def online_quarter_hourly(request: OnlineQuarterHourly,
                                         x_request_id: str = Header(...)):
     data_extractor = db.get_quarter_hourly
     route = PREFIX_URL + "/drivers/online/quarter_hourly"
@@ -91,7 +91,7 @@ async def drivers_online_quarter_hourly(request: OnlineQuarterHourly,
 @router.post("/drivers/on_order",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def drivers_on_order(request: OnOrder,
+async def on_order(request: OnOrder,
                            x_request_id: str = Header(...)):
     start = timestamp_to_datetime(request.start)
     data_extractor = db.get_on_order

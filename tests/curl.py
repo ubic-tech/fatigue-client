@@ -8,35 +8,35 @@ url = "http://127.0.0.1:8080"
 """test_ funcs are skeleton for future pytest"""
 
 
-async def test_v1_health():
+async def test_health():
     return await request(url + "/v1/health", headers=headers, method="get")
 
 
-async def test_drivers_fatigue():
+async def test_fatigue():
     return await request(url + "/v1/drivers/fatigue",
                          headers=headers,
                          data=dumps(drivers_fatigue_data))
 
 
-async def test_drivers_online_hour_start():
+async def test_online_hour_start():
     return await request(url + "/v1/drivers/online/hourly",
                          headers=headers,
                          data=dumps(drivers_online_hourly_request_data_start))
 
 
-async def test_drivers_online_hour_final():
+async def test_online_hour_final():
     return await request(url + "/v1/drivers/online/hourly",
                          headers=headers,
                          data=dumps(drivers_online_hourly_request_data_final))
 
 
-async def test_drivers_online_quarter_hourly():
+async def test_online_quarter_hourly():
     return await request(url + "/v1/drivers/online/quarter_hourly",
                          headers=headers,
                          data=dumps(drivers_online_quarter_hourly_request_data))
 
 
-async def test_drivers_on_order():
+async def test_on_order():
     return await request(url + "/v1/drivers/on_order",
                          headers=headers,
                          data=dumps(drivers_on_order_data))
@@ -44,12 +44,12 @@ async def test_drivers_on_order():
 
 async def all_tests():
     tests = [
-        test_v1_health,
-        #test_drivers_fatigue,
-        test_drivers_online_hour_start,
-        test_drivers_online_hour_final,
-        test_drivers_online_quarter_hourly,
-        #test_drivers_on_order,
+        test_health,
+        #test_fatigue,
+        test_online_hour_start,
+        test_online_hour_final,
+        test_online_quarter_hourly,
+        #test_on_order,
     ]
 
     for test in tests:
