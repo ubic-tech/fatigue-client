@@ -11,6 +11,7 @@ class AggregatorConfig:
     UBIC_URL: str = "http://127.0.0.1:8888"
     SHARES_ROUTE: str = "/v1/shares"
     ENDPOINTS_ROUTE: str = "/v1/endpoints"
+    ENDPOINTS_TTL = 3600
     AGGR_NAME: str = "Yandex"
     AGGR_HASH_ID: str = generate_id(AGGR_NAME)
     CLICK_HOUSE_URL: str = "archy1.dc"
