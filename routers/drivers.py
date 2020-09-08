@@ -44,13 +44,15 @@ async def compute(x_request_id, req_body, path, data_extractor,
     for_ubic, req_body.drivers = mpc(req_body.drivers, my_db_data, next_endpoint_hash_id)
 
     print("\n\n")
-    return
+    return SUCCESS
     if next_endpoint_hash_id:
         await request(next_endpoint_url + path, headers=headers, json=req_body)
         await request(ubic_shares_route, headers=headers, json=for_ubic)
     else:
         req_body.drivers = for_ubic
         await request(ubic_shares_route, headers=headers, json=req_body)
+
+    return SUCCESS
 
 
 @router.get("/health",
@@ -89,8 +91,8 @@ def fatigue(drivers: DriversFatigue,
         эмулировать блокировку как-то так: my.drivers[hash_id].block()?
         """
     print(request.headers)  # DBG
-    print(request.url.path)
-    print(drivers)
+    print(request.url.path)  # DBG
+    print(drivers)  # DBG
     return SUCCESS
 
 
@@ -100,11 +102,10 @@ def fatigue(drivers: DriversFatigue,
 async def online_hourly(online_hourly_data: OnlineHourly,
                         request: Request,
                         x_request_id: str = Header(...)):
-    await compute(x_request_id,
-                  online_hourly_data,
-                  request.url.path,
-                  db.get_hourly)
-    return SUCCESS
+    return await compute(x_request_id,
+                         online_hourly_data,
+                         request.url.path,
+                         db.get_hourly)
 
 
 @router.post("/drivers/online/quarter_hourly",
@@ -113,12 +114,10 @@ async def online_hourly(online_hourly_data: OnlineHourly,
 async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
                                 request: Request,
                                 x_request_id: str = Header(...)):
-    await compute(x_request_id,
-                  online_quarter_hourly_data,
-                  request.url.path,
-                  db.get_quarter_hourly)
-    print(online_quarter_hourly_data)  # DBG
-    return SUCCESS
+    return await compute(x_request_id,
+                         online_quarter_hourly_data,
+                         request.url.path,
+                         db.get_quarter_hourly)
 
 
 @router.post("/drivers/on_order",
@@ -127,10 +126,8 @@ async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
 async def on_order(on_order_data: OnOrder,
                    request: Request,
                    x_request_id: str = Header(...)):
-    await compute(x_request_id,
-                  on_order_data,
-                  request.url.path,
-                  db.get_on_order,
-                  timestamp_to_datetime(on_order_data.start))
-    print(request)  # DBG
-    return SUCCESS
+    return await compute(x_request_id,
+                         on_order_data,
+                         request.url.path,
+                         db.get_on_order,
+                         timestamp_to_datetime(on_order_data.start))
