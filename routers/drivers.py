@@ -9,11 +9,6 @@ from common.utils import (
     get_endpoint_url_by_hash,
 )
 
-# db -> repository
-#  routers -> drivers.py
-# delete prefix "driver"
-# aggr --
-# row DB ++
 
 ERROR = {'code': "503", 'message': "NOT OK"}
 SUCCESS = {'code': "200", 'message': "OK"}
@@ -38,7 +33,7 @@ async def common_strategy(headers, req_body, route, data_extractor,
     ts = timestamp_to_datetime(req_body.timestamp)
 
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
-    self_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
+    my_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain,
                                                           AggrConf.AGGR_HASH_ID):
         # next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
@@ -46,7 +41,7 @@ async def common_strategy(headers, req_body, route, data_extractor,
     else:
         next_endpoint_url = ""  # to eliminate warning
 
-    for_ubic, req_body.drivers = compute(req_body.drivers, self_db_data, next_endpoint_hash_id)
+    for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_hash_id)
 
     print("\n\n")
     return
@@ -90,7 +85,7 @@ def fatigue(request: DriversFatigue):
             ]
         }
         какую реакцию запрогить?
-        эмулировать блокировку как-то так: self.drivers[hash_id].block()?
+        эмулировать блокировку как-то так: my.drivers[hash_id].block()?
         """
     print(request)  # DBG
     return SUCCESS
