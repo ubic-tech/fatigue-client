@@ -1,7 +1,7 @@
 from fastapi import Header, APIRouter, Request
 from models.models import *
 from repository.clickhouse_repository import ClickhouseRepository
-from mpc.mpc import mpc
+from mpc.mpc import compute
 from config import AggregatorConfig as AggrConf
 from common.utils import timestamp_to_datetime, request, OperationError
 
@@ -69,7 +69,7 @@ async def process(x_request_id, req_body, path, data_extractor,
     else:
         next_endpoint_url = ""  # to eliminate warning
 
-    for_ubic, req_body.drivers = mpc(req_body.drivers, my_db_data, next_endpoint_hash_id)
+    for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_hash_id)
 
     print("\n\n")
     return SUCCESS

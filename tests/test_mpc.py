@@ -1,4 +1,4 @@
-from mpc.mpc import continue_mpc, finalize_mpc, mpc
+from mpc.mpc import continue_mpc, finalize_mpc, compute
 from models.models import DriverData
 from random import randint, seed
 from datetime import datetime
@@ -88,7 +88,7 @@ def test_mpc():
         finalize_mpc_helper(request_data, my_db_data, shares_count)
         for endpoint_hash_id in endpoint_hash_ids:
             original_request_data = deepcopy(request_data)
-            for_ubic, request_data = mpc(request_data, my_db_data, endpoint_hash_id)
+            for_ubic, request_data = compute(request_data, my_db_data, endpoint_hash_id)
             if endpoint_hash_id:
                 continue_mpc_validator(original_request_data, my_db_data, shares_count, request_data, for_ubic)
             else:

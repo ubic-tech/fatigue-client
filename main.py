@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from mpc.mpc import OperationError
+from common.utils import OperationError
 from starlette.responses import JSONResponse
 from routers.drivers import router, PREFIX_URL
 from config import AggregatorConfig
