@@ -1,4 +1,4 @@
-from fastapi import Header, APIRouter
+from fastapi import Header, APIRouter, Request
 from models.models import *
 from repository.clickhouse_repository import ClickhouseRepository
 from mpc.mpc import mpc
@@ -18,16 +18,17 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
 PREFIX_URL = "/v1"
 
 
-async def compute(headers, req_body, route, data_extractor,
+async def compute(x_request_id, req_body, path, data_extractor,
                   *data_extractor_params):
     """
         organizes strategy of MPC and web request forwarding
-        :param headers: headers from request to be forwarded
+        :param x_request_id: header from request to be forwarded
         :param req_body: request's data body (JSON is expected)
-        :param route: url specifying the MPC destination
+        :param path: url specifying the MPC destination
         :param data_extractor: data extraction method appropriate for
             current MPC destination
         """
+    headers = {"X-Request-Id": x_request_id, }
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
     ts = timestamp_to_datetime(req_body.timestamp)
 
@@ -45,7 +46,7 @@ async def compute(headers, req_body, route, data_extractor,
     print("\n\n")
     return
     if next_endpoint_hash_id:
-        await request(next_endpoint_url + route, headers=headers, json=req_body)
+        await request(next_endpoint_url + path, headers=headers, json=req_body)
         await request(ubic_shares_route, headers=headers, json=for_ubic)
     else:
         req_body.drivers = for_ubic
@@ -63,8 +64,9 @@ def health():
 @router.post("/drivers/fatigue",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def fatigue(request: DriversFatigue):
-    """X-Authorization and X-Request-Id required
+def fatigue(drivers: DriversFatigue,
+            request: Request):
+    """X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
         допустим пришло:
@@ -86,50 +88,49 @@ def fatigue(request: DriversFatigue):
         какую реакцию запрогить?
         эмулировать блокировку как-то так: my.drivers[hash_id].block()?
         """
-    print(request)  # DBG
+    print(request.headers)  # DBG
+    print(request.url.path)
+    print(drivers)
     return SUCCESS
 
 
 @router.post("/drivers/online/hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def online_hourly(request: OnlineHourly,
+async def online_hourly(online_hourly_data: OnlineHourly,
+                        request: Request,
                         x_request_id: str = Header(...)):
-    data_extractor = db.get_hourly
-    route = PREFIX_URL + "/drivers/online/hourly"
-
-    headers = {"X-Request-Id": x_request_id, }
-    await compute(headers,
-                  request,
-                  route,
-                  data_extractor)
+    await compute(x_request_id,
+                  online_hourly_data,
+                  request.url.path,
+                  db.get_hourly)
     return SUCCESS
 
 
-# headers to single param
-# routing from request
 @router.post("/drivers/online/quarter_hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def online_quarter_hourly(request: OnlineQuarterHourly,
+async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
+                                request: Request,
                                 x_request_id: str = Header(...)):
-    data_extractor = db.get_quarter_hourly
-    route = PREFIX_URL + "/drivers/online/quarter_hourly"
-    headers = {"X-Request-Id": x_request_id, }
-    await compute(headers, request, route, data_extractor)
-    print(request)  # DBG
+    await compute(x_request_id,
+                  online_quarter_hourly_data,
+                  request.url.path,
+                  db.get_quarter_hourly)
+    print(online_quarter_hourly_data)  # DBG
     return SUCCESS
 
 
 @router.post("/drivers/on_order",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def on_order(request: OnOrder,
+async def on_order(on_order_data: OnOrder,
+                   request: Request,
                    x_request_id: str = Header(...)):
-    start = timestamp_to_datetime(request.start)
-    data_extractor = db.get_on_order
-    route = PREFIX_URL + "/drivers/on_order"
-    headers = {"X-Request-Id": x_request_id, }
-    await compute(headers, request, route, data_extractor, start)
+    await compute(x_request_id,
+                  on_order_data,
+                  request.url.path,
+                  db.get_on_order,
+                  timestamp_to_datetime(on_order_data.start))
     print(request)  # DBG
     return SUCCESS
