@@ -16,7 +16,7 @@ def test_health():
 def test_fatigue():
     response = client.post("/v1/drivers/fatigue",
                            headers=headers,
-                           json=drivers_fatigue_data)
+                           data=fatigue_request.json())
     assert response.status_code == 200
     assert response.json() == EXPECTED
 
@@ -24,7 +24,7 @@ def test_fatigue():
 def test_online_hourly():
     response = client.post("/v1/drivers/online/hourly",
                            headers=headers,
-                           json=drivers_online_hourly_request_data)
+                           data=online_hourly_request.json())
     assert response.status_code == 200
     assert response.json() == EXPECTED
 
@@ -32,7 +32,7 @@ def test_online_hourly():
 def test_online_quarter_hourly():
     response = client.post("/v1/drivers/online/quarter_hourly",
                            headers=headers,
-                           json=drivers_online_quarter_hourly_request_data)
+                           data=online_quarter_hourly_request.json())
     assert response.status_code == 200
     assert response.json() == EXPECTED
 
@@ -40,6 +40,6 @@ def test_online_quarter_hourly():
 def test_on_order():
     response = client.post("/v1/drivers/on_order",
                            headers=headers,
-                           json=drivers_on_order_data)
+                           data=on_order_request.json())
     assert response.status_code == 200
     assert response.json() == EXPECTED
