@@ -94,8 +94,8 @@ def health():
 @router.post("/drivers/fatigue",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-def fatigue(drivers: DriversFatigue,
-            raw_request: Request):
+def fatigue(raw_request: Request,
+            drivers: DriversFatigue):
     """X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -127,8 +127,8 @@ def fatigue(drivers: DriversFatigue,
 @router.post("/drivers/online/hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def online_hourly(online_hourly_data: OnlineHourly,
-                        raw_request: Request,
+async def online_hourly(raw_request: Request,
+                        online_hourly_data: OnlineHourly,
                         x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_hourly_data,
@@ -139,8 +139,8 @@ async def online_hourly(online_hourly_data: OnlineHourly,
 @router.post("/drivers/online/quarter_hourly",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
-                                raw_request: Request,
+async def online_quarter_hourly(raw_request: Request,
+                                online_quarter_hourly_data: OnlineQuarterHourly,
                                 x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_quarter_hourly_data,
@@ -151,8 +151,8 @@ async def online_quarter_hourly(online_quarter_hourly_data: OnlineQuarterHourly,
 @router.post("/drivers/on_order",
              response_model=ServerResponse,
              response_model_exclude_unset=True)
-async def on_order(on_order_data: OnOrder,
-                   raw_request: Request,
+async def on_order(raw_request: Request,
+                   on_order_data: OnOrder,
                    x_request_id: str = Header(...)):
     return await process(x_request_id,
                          on_order_data,
