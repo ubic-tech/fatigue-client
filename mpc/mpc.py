@@ -62,7 +62,7 @@ def finalize_mpc(request_drivers: List[DriverData],
     return res
 
 
-def compute(req_body_drivers: List[DriverData],
+def mpc(req_body_drivers: List[DriverData],
             my_db_data: Mapping[DriverID, List[Share]],
             next_endpoint_hash_id: str) -> (List[DriverData], List[DriverData]):
     """

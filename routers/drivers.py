@@ -1,7 +1,7 @@
 from fastapi import Header, APIRouter
 from models.models import *
 from repository.clickhouse_repository import ClickhouseRepository
-from mpc.mpc import compute
+from mpc.mpc import mpc
 from config import AggregatorConfig as AggrConf
 from common.utils import (
     timestamp_to_datetime,
@@ -41,7 +41,7 @@ async def common_strategy(headers, req_body, route, data_extractor,
     else:
         next_endpoint_url = ""  # to eliminate warning
 
-    for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_hash_id)
+    for_ubic, req_body.drivers = mpc(req_body.drivers, my_db_data, next_endpoint_hash_id)
 
     print("\n\n")
     return
