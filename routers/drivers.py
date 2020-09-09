@@ -47,13 +47,13 @@ def get_next_endpoint_uuid(chain: drivers.List[str], my_uuid: str) -> str:
 async def process(x_request_id, req_body, path, data_extractor,
                   *data_extractor_params):
     """
-        organizes strategy of MPC and web request forwarding
-        :param x_request_id: header from request to be forwarded
-        :param req_body: request's data body (JSON is expected)
-        :param path: url specifying the MPC destination
-        :param data_extractor: data extraction method appropriate for
-            current MPC destination
-        """
+    organizes strategy of MPC and web request forwarding
+    :param x_request_id: header from request to be forwarded
+    :param req_body: request's data body (JSON is expected)
+    :param path: url specifying the MPC destination
+    :param data_extractor: data extraction method appropriate for
+        current MPC destination
+    """
     headers = {"X-Request-Id": x_request_id, }
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
     ts = req_body.timestamp
