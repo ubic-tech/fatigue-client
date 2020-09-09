@@ -31,16 +31,16 @@ def continue_mpc(request_drivers: List[DriverShares],
         one to be handled by Ubic the other to be handled by the next Endpoint
     """
     ubic_drivers_shares = []  # to be sent to UBIC
-    common_driver_shares = deepcopy(request_drivers)
-    for i, driver in enumerate(common_driver_shares):
+    driver_shares = deepcopy(request_drivers)
+    for i, driver in enumerate(driver_shares):
         my_shares = my_db_data[driver.hash_id]
         ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=[])  # to be appended to ubic_drivers_shares
         for j, share in enumerate(my_shares):
             for_ubic, for_common = get_rand_pair(int(share))  # for_ubic + for_common == share
             ubic_driver_data.shares.append(for_ubic)
-            common_driver_shares[i].shares[j] += for_common  # add 'my' share summed up with common
+            driver_shares[i].shares[j] += for_common  # add 'my' share summed up with common
         ubic_drivers_shares.append(ubic_driver_data)
-    return ubic_drivers_shares, common_driver_shares
+    return ubic_drivers_shares, driver_shares
 
 
 def finalize_mpc(request_drivers: List[DriverShares],
