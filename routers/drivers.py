@@ -15,8 +15,6 @@ router = APIRouter()
 db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
                           AggrConf.AGGR_NAME)
 
-PREFIX_URL = "/v1"
-
 
 @ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
 async def get_endpoint_url_by_hash(hash_id) -> str:

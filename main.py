@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from utils.utils import OperationError
 from starlette.responses import JSONResponse
-from routers.drivers import router, PREFIX_URL
-from config import AggregatorConfig
+from routers.drivers import router
+from config import AggregatorConfig, PREFIX_URL
 from datetime import datetime
 from random import seed
 

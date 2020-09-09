@@ -6,6 +6,9 @@ def generate_id(x: str) -> str:
     return sha256(x.encode('utf-8')).hexdigest()
 
 
+PREFIX_URL = "/v1"
+
+
 @env_config
 class AggregatorConfig:
     UBIC_URL: str = "http://127.0.0.1:8888"
