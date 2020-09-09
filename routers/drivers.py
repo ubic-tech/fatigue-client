@@ -14,7 +14,7 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
 
 
 @ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
-async def get_endpoint_url_by_uuid(uuid) -> str:
+async def get_endpoint_by_uuid(uuid) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
     resp = await request(route, json={"identifiers": [uuid, ]})
     try:
@@ -62,7 +62,7 @@ async def process(x_request_id, req_body, path, data_extractor,
     my_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
     if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
                                                     str(AggrConf.AGGR_UUID)):
-        # next_endpoint_url = await get_endpoint_url_by_uuid(next_endpoint_hash_id)  # request in advance
+        # next_endpoint_url = await get_endpoint_by_uuid(next_endpoint_hash_id)  # request in advance
         pass
     else:
         next_endpoint_url = ""  # to eliminate warning
