@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class EndpointInfo(BaseModel):
@@ -18,12 +18,9 @@ class DriverShares(BaseModel):
 
 class ControlBody(BaseModel):
     timestamp: str
+    start: Optional[str]
     chain: List[str]
     drivers: List[DriverShares]
-
-
-class OnOrder(ControlBody):
-    start: str
 
 
 class DriverFatigue(BaseModel):

@@ -65,7 +65,7 @@ online_quarter_hourly_request = ControlBody(
            "4b79a79f55f212dc479a5da443942efe08a8ff8b1e4d6ff2f351c305c8f4bcd0"]
 )
 
-on_order_request = OnOrder(
+on_order_request = ControlBody(
     timestamp="2020-07-14T16:46:00Z",
     start="2020-07-14T17:46:00Z",
     drivers=[

@@ -144,7 +144,7 @@ async def online_quarter_hourly(raw_request: Request,
              response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def on_order(raw_request: Request,
-                   on_order_data: drivers.OnOrder,
+                   on_order_data: drivers.ControlBody,
                    x_request_id: str = Header(...)):
     return await process(x_request_id,
                          on_order_data,
