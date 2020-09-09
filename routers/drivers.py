@@ -99,7 +99,7 @@ def health():
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 def fatigue(raw_request: Request,
-            drivers: DriversFatigue):
+            drivers: Fatigue):
     """X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -132,7 +132,7 @@ def fatigue(raw_request: Request,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def online_hourly(raw_request: Request,
-                        online_hourly_data: OnlineHourly,
+                        online_hourly_data: Online,
                         x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_hourly_data,
@@ -144,7 +144,7 @@ async def online_hourly(raw_request: Request,
              response_model=ServerResponse,
              response_model_exclude_unset=True)
 async def online_quarter_hourly(raw_request: Request,
-                                online_quarter_hourly_data: OnlineQuarterHourly,
+                                online_quarter_hourly_data: Online,
                                 x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_quarter_hourly_data,

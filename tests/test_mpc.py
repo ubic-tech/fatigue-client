@@ -3,7 +3,7 @@ from datetime import datetime
 from copy import deepcopy
 
 from mpc.mpc import continue_mpc, finalize_mpc, compute
-from models.drivers import DriverData
+from models.drivers import Driver
 
 from typing import List
 
@@ -33,9 +33,9 @@ my_db_data_sets = [
 
 
 def get_request_data(hash_ids: List[str], shares_count: int)\
-        -> List[DriverData]:
+        -> List[Driver]:
     return [
-        DriverData(hash_id=h, shares=[
+        Driver(hash_id=h, shares=[
             randint(-1000, 1000) for _ in range(shares_count)
         ]) for h in hash_ids
     ]

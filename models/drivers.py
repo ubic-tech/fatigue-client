@@ -16,7 +16,7 @@ class EndpointResponse(BaseModel):
     endpoints: List[Endpoint]
 
 
-class DriverData(BaseModel):
+class Driver(BaseModel):
     hash_id: str
     shares: List[int]
 
@@ -26,15 +26,11 @@ class Drivers(BaseModel):
     chain: List[str]
 
 
-class OnlineHourly(Drivers):
-    drivers: List[DriverData]
+class Online(Drivers):
+    drivers: List[Driver]
 
 
-class OnlineQuarterHourly(OnlineHourly):
-    pass
-
-
-class OnOrder(OnlineHourly):
+class OnOrder(Online):
     start: str
 
 
@@ -44,6 +40,6 @@ class DriverFatigue(BaseModel):
     on_order: int
 
 
-class DriversFatigue(BaseModel):
+class Fatigue(BaseModel):
     timestamp: str
     drivers: List[DriverFatigue]
