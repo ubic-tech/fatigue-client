@@ -1,5 +1,6 @@
 from fastapi import Header, APIRouter, Request
 from cachetools.func import ttl_cache
+from pydantic.error_wrappers import ValidationError
 
 from utils.utils import timestamp_to_datetime, request, OperationError
 from models.drivers import *
@@ -21,9 +22,10 @@ PREFIX_URL = "/v1"
 async def get_endpoint_url_by_hash(hash_id) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
     resp = await request(route, json={"identifiers": [hash_id, ]})
-    if resp is None:
-        pass  # todo: validate
-    return EndpointResponse(**resp).endpoints[0].endpoint
+    try:
+        return EndpointResponse(**resp).endpoints[0].endpoint
+    except (ValidationError, IndexError):
+        raise OperationError
 
 
 def get_next_endpoint_hash_id(chain: List[str], my_hash_id: str) -> str:
