@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from utils.utils import OperationError
 from starlette.responses import JSONResponse
-from routers.drivers import router
+from routers import drivers, health
 from config import AggregatorConfig, PREFIX_URL
 from datetime import datetime
 from random import seed
@@ -16,10 +16,8 @@ async def attribute_exists(request, exc):
     return JSONResponse({"error": str(exc)}, status_code=503)
 
 
-app.include_router(
-    router,
-    prefix=PREFIX_URL
-)
+for r in (drivers.router, health.router):
+    app.include_router(r, prefix=PREFIX_URL)
 
 
 @app.on_event("startup")

@@ -3,14 +3,12 @@ from cachetools.func import ttl_cache
 from pydantic.error_wrappers import ValidationError
 
 from utils.utils import timestamp_to_datetime, request, OperationError
-from models.drivers import *
+from models import drivers, common
 from repository.clickhouse_repository import ClickhouseRepository
 from mpc.mpc import compute
 from config import AggregatorConfig as AggrConf
 
 
-ERROR = {'code': "503", 'message': "NOT OK"}
-SUCCESS = {'code': "200", 'message': "OK"}
 router = APIRouter()
 db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
                           AggrConf.AGGR_NAME)
@@ -21,12 +19,12 @@ async def get_endpoint_url_by_hash(hash_id) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
     resp = await request(route, json={"identifiers": [hash_id, ]})
     try:
-        return EndpointResponse(**resp).endpoints[0].endpoint
+        return drivers.EndpointResponse(**resp).endpoints[0].endpoint
     except (ValidationError, IndexError):
         raise OperationError
 
 
-def get_next_endpoint_hash_id(chain: List[str], my_hash_id: str) -> str:
+def get_next_endpoint_hash_id(chain: drivers.List[str], my_hash_id: str) -> str:
     """
     Pops AggrConf.AGGR_HASH_ID from the chain
     the 1st hash ID is expected to be AggrConf.AGGR_HASH_ID
@@ -74,7 +72,7 @@ async def process(x_request_id, req_body, path, data_extractor,
     for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_hash_id)
 
     print("\n\n")
-    return SUCCESS
+    return common.SUCCESS
     if next_endpoint_hash_id:
         await request(next_endpoint_url + path, headers=headers, json=req_body)
         await request(ubic_shares_route, headers=headers, json=for_ubic)
@@ -82,22 +80,14 @@ async def process(x_request_id, req_body, path, data_extractor,
         req_body.drivers = for_ubic
         await request(ubic_shares_route, headers=headers, json=req_body)
 
-    return SUCCESS
-
-
-@router.get("/health",
-            response_model=ServerResponse,
-            response_model_exclude_unset=True)
-def health():
-    """simple heartbeat"""
-    return SUCCESS
+    return common.SUCCESS
 
 
 @router.post("/drivers/fatigue",
-             response_model=ServerResponse,
+             response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 def fatigue(raw_request: Request,
-            drivers: Fatigue):
+            fatigue_drivers: drivers.Fatigue):
     """X-Request-Id required
         stores data of tired drivers
         и что с этим делать?
@@ -122,15 +112,15 @@ def fatigue(raw_request: Request,
         """
     print(raw_request.headers)  # DBG
     print(raw_request.url.path)  # DBG
-    print(drivers)  # DBG
-    return SUCCESS
+    print(fatigue_drivers)  # DBG
+    return common.SUCCESS
 
 
 @router.post("/drivers/online/hourly",
-             response_model=ServerResponse,
+             response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def online_hourly(raw_request: Request,
-                        online_hourly_data: Online,
+                        online_hourly_data: drivers.Online,
                         x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_hourly_data,
@@ -139,10 +129,10 @@ async def online_hourly(raw_request: Request,
 
 
 @router.post("/drivers/online/quarter_hourly",
-             response_model=ServerResponse,
+             response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def online_quarter_hourly(raw_request: Request,
-                                online_quarter_hourly_data: Online,
+                                online_quarter_hourly_data: drivers.Online,
                                 x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_quarter_hourly_data,
@@ -151,10 +141,10 @@ async def online_quarter_hourly(raw_request: Request,
 
 
 @router.post("/drivers/on_order",
-             response_model=ServerResponse,
+             response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def on_order(raw_request: Request,
-                   on_order_data: OnOrder,
+                   on_order_data: drivers.OnOrder,
                    x_request_id: str = Header(...)):
     return await process(x_request_id,
                          on_order_data,
