@@ -5,7 +5,7 @@ from pydantic.error_wrappers import ValidationError
 from utils.utils import timestamp_to_datetime, request, OperationError
 from models import drivers, common
 from repository.clickhouse_repository import ClickhouseRepository
-from mpc.mpc import compute
+from core.mpc import compute
 from config import AggregatorConfig as AggrConf
 
 

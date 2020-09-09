@@ -2,7 +2,7 @@ from random import randint, seed
 from datetime import datetime
 from copy import deepcopy
 
-from mpc.mpc import continue_mpc, finalize_mpc, compute
+from core.mpc import continue_mpc, finalize_mpc, compute
 from models.drivers import DriverShares
 
 from typing import List
