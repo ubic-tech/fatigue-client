@@ -34,12 +34,11 @@ def get_next_endpoint_hash_id(chain: drivers.List[str], my_hash_id: str) -> str:
     :return: hash ID of an endpoint following after AggrConf.AGGR_UUID
         or an empty string if does not exist
     """
-    try:  # the 1st hash_id is expected to be 'mine'
-        if chain[0] != my_hash_id:
+    try:  # the 1st hash_id is expected to be 'mine' and should be popped out
+        if chain.pop(0) != my_hash_id:
             raise OperationError
     except IndexError:
         raise OperationError
-    chain.pop(0)  # pop 'my' hash_id
     try:  # try getting next aggr in chain
         return chain[0]  # return the next endpoint's hash_id
     except IndexError:  # means 'I' am the last aggregator in the chain
