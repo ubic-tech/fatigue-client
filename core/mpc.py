@@ -7,7 +7,6 @@ from typing import List, Mapping
 from repository.drivers_repository import DriverID, Share
 from models.drivers import DriverShares
 
-# mpc dir to core
 
 def get_rand_pair(base: int) -> (int, int):
     """
