@@ -2,30 +2,27 @@ from pydantic import BaseModel
 from typing import List
 
 
-class Endpoint(BaseModel):
+class EndpointInfo(BaseModel):
     id: str
     endpoint: str
 
 
 class EndpointResponse(BaseModel):
-    endpoints: List[Endpoint]
+    endpoints: List[EndpointInfo]
 
 
-class Driver(BaseModel):
+class DriverShares(BaseModel):
     hash_id: str
     shares: List[int]
 
 
-class Drivers(BaseModel):
+class ControlBody(BaseModel):
     timestamp: str
     chain: List[str]
+    drivers: List[DriverShares]
 
 
-class Online(Drivers):
-    drivers: List[Driver]
-
-
-class OnOrder(Online):
+class OnOrder(ControlBody):
     start: str
 
 
@@ -35,6 +32,6 @@ class DriverFatigue(BaseModel):
     on_order: int
 
 
-class Fatigue(BaseModel):
+class FatigueBody(BaseModel):
     timestamp: str
     drivers: List[DriverFatigue]
