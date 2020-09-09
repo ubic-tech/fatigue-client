@@ -59,8 +59,9 @@ async def process(x_request_id, req_body, path, data_extractor,
     ts = req_body.timestamp
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     my_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)
-    if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
-                                                    str(AggrConf.AGGR_UUID)):
+    next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain,
+                                                str(AggrConf.AGGR_UUID))
+    if len(next_endpoint_uuid):
         # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
         # await request(next_endpoint+path, headers=headers, json=for_next_aggr)
