@@ -61,10 +61,9 @@ def finalize_mpc(
     """
     ubic_drivers_shares = []
     for i, driver in enumerate(drivers):  # sum up 'my' shares with received ones
-        ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=[])
-        my_shares = my_data[driver.hash_id]
-        for j, share in enumerate(my_shares):  # shares += "my" shares gotten by hash_id
-            ubic_driver_data.shares.append(driver.shares[j] + my_shares[j])
+        my_shares = my_data[driver.hash_id]  # no miss guarantee by caller
+        ubic_shares = [driver.shares[j] + share for j, share in enumerate(my_shares)]
+        ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=ubic_shares)
         ubic_drivers_shares.append(ubic_driver_data)
     return ubic_drivers_shares
 
