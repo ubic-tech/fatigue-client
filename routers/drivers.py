@@ -27,11 +27,11 @@ async def get_endpoint_url_by_hash(hash_id) -> str:
 def get_next_endpoint_hash_id(chain: drivers.List[str], my_hash_id: str) -> str:
     """
     Pops AggrConf.AGGR_HASH_ID from the chain
-    the 1st hash ID is expected to be AggrConf.AGGR_HASH_ID
+    the 1st hash ID is expected to be AggrConf.AGGR_UUID
         raises OperationError if not
     :param chain: list of endpoints' hash IDs
     :param my_hash_id: this aggregator's hash ID
-    :return: hash ID of an endpoint following after AggrConf.AGGR_HASH_ID
+    :return: hash ID of an endpoint following after AggrConf.AGGR_UUID
         or an empty string if does not exist
     """
     try:  # the 1st hash_id is expected to be 'mine'
@@ -63,7 +63,7 @@ async def process(x_request_id, req_body, path, data_extractor,
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     my_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
     if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain,
-                                                          AggrConf.AGGR_HASH_ID):
+                                                          AggrConf.AGGR_UUID):
         # next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
         pass
     else:

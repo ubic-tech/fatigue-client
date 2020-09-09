@@ -42,9 +42,9 @@ online_hourly_request = drivers.ControlBody(
             hash_id="db3defda18fafc0c197740438051c690d98b551a7e449d66390d38fa2db09b77",
             shares=[1])
     ],
-    chain=["2e6e018516f4caaf129ac71a377fc6f41a80415230228b697c9be0854ba1f820",
-           "fc33f73246f48295702f404001e74d56f14d2f82689b2816422dc1a4c2ec4fb2",
-           "4b79a79f55f212dc479a5da443942efe08a8ff8b1e4d6ff2f351c305c8f4bcd0"]
+    chain=["8704d129-1af0-489e-b761-d40344c12e70",
+           "0075c51d-3df1-4d2b-8d98-66cbd25af2a0",
+           "431cb246-683d-4ed7-a9fd-4384c72d3604"]
 )
 
 online_quarter_hourly_request = drivers.ControlBody(
@@ -60,9 +60,9 @@ online_quarter_hourly_request = drivers.ControlBody(
             hash_id="6cb6d4b2fa122bf8bd63280061e4a230565fdec3ce03268caa2f48ccd931c691",
             shares=[0, 0, 1, 1])
     ],
-    chain=["2e6e018516f4caaf129ac71a377fc6f41a80415230228b697c9be0854ba1f820",
-           "fc33f73246f48295702f404001e74d56f14d2f82689b2816422dc1a4c2ec4fb2",
-           "4b79a79f55f212dc479a5da443942efe08a8ff8b1e4d6ff2f351c305c8f4bcd0"]
+    chain=["8704d129-1af0-489e-b761-d40344c12e70",
+           "0075c51d-3df1-4d2b-8d98-66cbd25af2a0",
+           "431cb246-683d-4ed7-a9fd-4384c72d3604"]
 )
 
 on_order_request = drivers.ControlBody(
@@ -79,7 +79,7 @@ on_order_request = drivers.ControlBody(
             hash_id="624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
             shares=[7])
     ],
-    chain=["2e6e018516f4caaf129ac71a377fc6f41a80415230228b697c9be0854ba1f820",
-           "fc33f73246f48295702f404001e74d56f14d2f82689b2816422dc1a4c2ec4fb2",
-           "4b79a79f55f212dc479a5da443942efe08a8ff8b1e4d6ff2f351c305c8f4bcd0"]
+    chain=["8704d129-1af0-489e-b761-d40344c12e70",
+           "0075c51d-3df1-4d2b-8d98-66cbd25af2a0",
+           "431cb246-683d-4ed7-a9fd-4384c72d3604"]
 )

@@ -16,5 +16,5 @@ class AggregatorConfig:
     ENDPOINTS_ROUTE: str = "/v1/endpoints"
     ENDPOINTS_TTL = 3600
     AGGR_NAME: str = "Yandex"
-    AGGR_HASH_ID: str = generate_id(AGGR_NAME)
+    AGGR_UUID: str = "8704d129-1af0-489e-b761-d40344c12e70"
     CLICK_HOUSE_URL: str = "archy1.dc"

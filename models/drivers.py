@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -19,7 +21,7 @@ class DriverShares(BaseModel):
 class ControlBody(BaseModel):
     timestamp: str
     start: Optional[str]
-    chain: List[str]
+    chain: List[str]  # UUID
     drivers: List[DriverShares]
 
 

@@ -24,10 +24,10 @@ for r in (drivers.router, health.router):
 async def init_app():
     seed(datetime.now().microsecond)
     print(AggregatorConfig.AGGR_NAME, " started, hash id == ",
-          AggregatorConfig.AGGR_HASH_ID)
+          AggregatorConfig.AGGR_UUID)
 
 
 @app.on_event("shutdown")
 async def close_app():
     print(AggregatorConfig.AGGR_NAME, " finished, hash id == ",
-          AggregatorConfig.AGGR_HASH_ID)
+          AggregatorConfig.AGGR_UUID)
