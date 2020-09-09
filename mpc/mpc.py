@@ -7,9 +7,6 @@ from typing import List, Mapping
 from repository.drivers_repository import DriverID, Share
 from models.drivers import DriverShares
 
-# request_driver , req_body_drivers -> requested_driver
-# my_db_data -> my_data
-# delete common
 # mpc dir to core
 
 def get_rand_pair(base: int) -> (int, int):
@@ -41,9 +38,9 @@ def continue_mpc(
         my_shares = my_db_data[driver.hash_id]
         ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=[])  # to be appended to ubic_drivers_shares
         for j, share in enumerate(my_shares):
-            for_ubic, for_common = get_rand_pair(int(share))  # for_ubic + for_common == share
+            for_ubic, for_next_aggr = get_rand_pair(int(share))  # for_ubic + for_next_aggr == share
             ubic_driver_data.shares.append(for_ubic)
-            driver_shares[i].shares[j] += for_common  # add 'my' share summed up with common
+            driver_shares[i].shares[j] += for_next_aggr  # add 'my' shares summed up with for_next_aggr's ones
         ubic_drivers_shares.append(ubic_driver_data)
     return ubic_drivers_shares, driver_shares
 
@@ -64,7 +61,7 @@ def finalize_mpc(
     for i, driver_data in enumerate(res):  # sum up 'my' shares with received ones
         _id = driver_data.hash_id
         my_shares = my_data[_id]
-        for j, share in enumerate(my_shares):  # common shares += "my" shares gotten by hash_id
+        for j, share in enumerate(my_shares):  # shares += "my" shares gotten by hash_id
             res[i].shares[j] += my_shares[j]
     return res
 
