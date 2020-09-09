@@ -8,39 +8,38 @@ from repository.clickhouse_repository import ClickhouseRepository
 from core.mpc import compute
 from config import AggregatorConfig as AggrConf
 
-
 router = APIRouter()
 db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
                           AggrConf.AGGR_NAME)
 
 
 @ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
-async def get_endpoint_url_by_hash(hash_id) -> str:
+async def get_endpoint_url_by_uuid(uuid) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
-    resp = await request(route, json={"identifiers": [hash_id, ]})
+    resp = await request(route, json={"identifiers": [uuid, ]})
     try:
         return drivers.EndpointResponse(**resp).endpoints[0].endpoint
     except (ValidationError, IndexError):
         raise OperationError
 
 
-def get_next_endpoint_hash_id(chain: drivers.List[str], my_hash_id: str) -> str:
+def get_next_endpoint_uuid(chain: drivers.List[str], my_uuid: str) -> str:
     """
     Pops AggrConf.AGGR_HASH_ID from the chain
     the 1st hash ID is expected to be AggrConf.AGGR_UUID
         raises OperationError if not
     :param chain: list of endpoints' hash IDs
-    :param my_hash_id: this aggregator's hash ID
+    :param my_uuid: this aggregator's hash ID
     :return: hash ID of an endpoint following after AggrConf.AGGR_UUID
         or an empty string if does not exist
     """
     try:  # the 1st hash_id is expected to be 'mine' and should be popped out
-        if chain.pop(0) != my_hash_id:
+        if str(chain.pop(0)) != my_uuid:
             raise OperationError
     except IndexError:
         raise OperationError
     try:  # try getting next aggr in chain
-        return chain[0]  # return the next endpoint's hash_id
+        return str(chain[0])  # return the next endpoint's hash_id
     except IndexError:  # means 'I' am the last aggregator in the chain
         return ""
 
@@ -61,14 +60,14 @@ async def process(x_request_id, req_body, path, data_extractor,
 
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     my_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
-    if next_endpoint_hash_id := get_next_endpoint_hash_id(req_body.chain,
-                                                          AggrConf.AGGR_UUID):
-        # next_endpoint_url = await get_endpoint_url_by_hash(next_endpoint_hash_id)  # request in advance
+    if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
+                                                    str(AggrConf.AGGR_UUID)):
+        # next_endpoint_url = await get_endpoint_url_by_uuid(next_endpoint_hash_id)  # request in advance
         pass
     else:
         next_endpoint_url = ""  # to eliminate warning
 
-    for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_hash_id)
+    for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_uuid)
 
     print("\n\n")
     return common.SUCCESS

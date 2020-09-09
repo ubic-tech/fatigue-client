@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from models import drivers
 
 headers = {
@@ -42,9 +44,9 @@ online_hourly_request = drivers.ControlBody(
             hash_id="db3defda18fafc0c197740438051c690d98b551a7e449d66390d38fa2db09b77",
             shares=[1])
     ],
-    chain=["8704d129-1af0-489e-b761-d40344c12e70",
-           "0075c51d-3df1-4d2b-8d98-66cbd25af2a0",
-           "431cb246-683d-4ed7-a9fd-4384c72d3604"]
+    chain=[UUID("8704d129-1af0-489e-b761-d40344c12e70"),
+           UUID("0075c51d-3df1-4d2b-8d98-66cbd25af2a0"),
+           UUID("431cb246-683d-4ed7-a9fd-4384c72d3604")]
 )
 
 online_quarter_hourly_request = drivers.ControlBody(

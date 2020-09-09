@@ -1,5 +1,6 @@
-from utils.config import env_config
 from hashlib import sha256
+
+from utils.config import env_config
 
 
 def generate_id(x: str) -> str:
