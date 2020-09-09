@@ -66,29 +66,3 @@ def finalize_mpc(
         ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=ubic_shares)
         ubic_drivers_shares.append(ubic_driver_data)
     return ubic_drivers_shares
-
-
-def compute(drivers: List[DriverShares],
-            my_data: Mapping[DriverID, List[Share]],
-            next_aggr_hash_id: str) -> (List[DriverShares], List[DriverShares]):
-    """
-    if next_endpoint_hash_id is empty returns finalize_mpc()
-        else returns continue_mpc()
-    :param drivers: drivers field from request body
-    :param my_data: drivers data extracted with a certain DriverRepository's method
-    :param next_aggr_hash_id: hash ID of an endpoint to forward MPC to
-    :return: a pair of DriverShares objects lists containing shares
-        to continue or finalize MPC
-    """
-    print("my_data: ", my_data)  # DBG
-
-    if len(next_aggr_hash_id):
-        u, c = continue_mpc(drivers, my_data)  # DBG
-        print("ubic_drivers_shares: ", u)  # DBG
-        print("forwarding req: ", c)  # DBG
-        return continue_mpc(drivers, my_data)
-    else:
-        u = finalize_mpc(drivers, my_data)  # DBG
-        # simply our share summed with total
-        print("forwarding req: ", u)
-        return finalize_mpc(drivers, my_data), []

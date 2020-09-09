@@ -5,7 +5,7 @@ from pydantic.error_wrappers import ValidationError
 from utils.utils import timestamp_to_datetime, request, OperationError
 from models import drivers, common
 from repository.clickhouse_repository import ClickhouseRepository
-from core.mpc import compute
+from core.mpc import continue_mpc, finalize_mpc
 from config import AggregatorConfig as AggrConf
 
 router = APIRouter()
@@ -59,24 +59,16 @@ async def process(x_request_id, req_body, path, data_extractor,
     ts = timestamp_to_datetime(req_body.timestamp)
 
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
-    my_db_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)  # Mapping[DriverID, Share]
+    my_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)
     if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
                                                     str(AggrConf.AGGR_UUID)):
-        # next_endpoint_url = await get_endpoint_by_uuid(next_endpoint_hash_id)  # request in advance
-        pass
+        # next_endpoint_url = await get_endpoint_by_uuid(next_endpoint_hash_id)
+        for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
+        # await request(next_endpoint_url + path, headers=headers, json=for_next_aggr)
+        # await request(ubic_shares_route, headers=headers, json=for_ubic)
     else:
-        next_endpoint_url = ""  # to eliminate warning
-
-    for_ubic, req_body.drivers = compute(req_body.drivers, my_db_data, next_endpoint_uuid)
-
-    print("\n\n")
-    return common.SUCCESS
-    if next_endpoint_hash_id:
-        await request(next_endpoint_url + path, headers=headers, json=req_body)
-        await request(ubic_shares_route, headers=headers, json=for_ubic)
-    else:
-        req_body.drivers = for_ubic
-        await request(ubic_shares_route, headers=headers, json=req_body)
+        for_ubic = finalize_mpc(req_body.drivers, my_data)
+        # await request(ubic_shares_route, headers=headers, json=for_ubic)
 
     return common.SUCCESS
 
