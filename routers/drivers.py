@@ -78,31 +78,7 @@ async def process(x_request_id, req_body, path, data_extractor,
              response_model_exclude_unset=True)
 def fatigue(raw_request: Request,
             fatigue_drivers: drivers.FatigueBody):
-    """X-Request-Id required
-        stores data of tired drivers
-        и что с этим делать?
-        допустим пришло:
-        {
-            "timestamp": "2020-08-11T16:30:25.199",
-            "drivers" : [
-                {
-                    "hash_id": "8xx8",
-                    "online": "40",
-                    "on_order": "20",
-                },
-                {
-                    "hash_id": "8x7x8",
-                    "online": "80",
-                    "on_order": "20",
-                },
-            ]
-        }
-        какую реакцию запрогить?
-        эмулировать блокировку как-то так: my.drivers[hash_id].block()?
-        """
-    print(raw_request.headers)  # DBG
-    print(raw_request.url.path)  # DBG
-    print(fatigue_drivers)  # DBG
+    # handle fatigue_drivers here
     return common.SUCCESS
 
 
