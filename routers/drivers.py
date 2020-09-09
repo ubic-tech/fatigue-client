@@ -2,7 +2,7 @@ from fastapi import Header, APIRouter, Request
 from cachetools.func import ttl_cache
 from pydantic.error_wrappers import ValidationError
 
-from utils.utils import timestamp_to_datetime, request, OperationError
+from utils.utils import request, OperationError
 from models import drivers, common
 from repository.clickhouse_repository import ClickhouseRepository
 from core.mpc import continue_mpc, finalize_mpc
@@ -56,15 +56,14 @@ async def process(x_request_id, req_body, path, data_extractor,
         """
     headers = {"X-Request-Id": x_request_id, }
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
-    ts = timestamp_to_datetime(req_body.timestamp)
-
+    ts = req_body.timestamp
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     my_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)
     if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
                                                     str(AggrConf.AGGR_UUID)):
-        # next_endpoint_url = await get_endpoint_by_uuid(next_endpoint_hash_id)
+        # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        # await request(next_endpoint_url + path, headers=headers, json=for_next_aggr)
+        # await request(next_endpoint+path, headers=headers, json=for_next_aggr)
         # await request(ubic_shares_route, headers=headers, json=for_ubic)
     else:
         for_ubic = finalize_mpc(req_body.drivers, my_data)
@@ -140,4 +139,4 @@ async def on_order(raw_request: Request,
                          on_order_data,
                          raw_request.url.path,
                          db.get_on_order,
-                         timestamp_to_datetime(on_order_data.start))
+                         on_order_data.start)

@@ -17,7 +17,3 @@ async def request(url, *, method='post', expected_status=200, **kwargs):
             if resp.status != expected_status:
                 raise StatusError(resp.status, await resp.text())
             return await resp.json()
-
-
-def timestamp_to_datetime(timestamp: str) -> datetime:
-    return datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')

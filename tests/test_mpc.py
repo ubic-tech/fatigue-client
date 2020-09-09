@@ -1,6 +1,5 @@
 from random import randint, seed
 from datetime import datetime
-from copy import deepcopy
 
 from core.mpc import continue_mpc, finalize_mpc
 from models.drivers import DriverShares
@@ -81,7 +80,6 @@ def finalize_mpc_helper(request_data, my_data, shares_count):
 
 
 def test_mpc():
-    endpoint_hash_ids = ["", "a", ]
     for my_data in my_data_sets:
         shares_count = len(my_data[drivers_hash_ids[0]])  # lens should be equal
         request_data = get_request_data(drivers_hash_ids, shares_count)

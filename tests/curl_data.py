@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime
 
 from models import drivers
 
@@ -7,7 +8,7 @@ headers = {
 }
 
 fatigue_request = drivers.FatigueBody(
-    timestamp="2020-07-14T16:46:00Z",
+    timestamp=datetime(year=2020, month=7, day=14, hour=16, minute=46),
     drivers=[
         drivers.DriverFatigue(hash_id="a",
                               online=50,
@@ -18,24 +19,8 @@ fatigue_request = drivers.FatigueBody(
     ]
 )
 
-drivers_fatigue_data = {
-    "timestamp": "2020-08-11T16:30:25Z",
-    "drivers": [
-        {
-            "hash_id": "Rogue101",
-            "online": 100,
-            "on_order": 50,
-        },
-        {
-            "hash_id": "Harsh303",
-            "online": 100,
-            "on_order": 50,
-        },
-    ]
-}
-
 online_hourly_request = drivers.ControlBody(
-    timestamp="2020-07-14T16:46:00Z",
+    timestamp=datetime(year=2020, month=7, day=14, hour=16, minute=46),
     drivers=[
         drivers.DriverShares(
             hash_id="b7c7470e59e2a2df1bfd0a4705488ee6fe0c5c125de15cccdfab0e00d6c03dc0",
@@ -50,7 +35,7 @@ online_hourly_request = drivers.ControlBody(
 )
 
 online_quarter_hourly_request = drivers.ControlBody(
-    timestamp="2020-07-14T16:46:00Z",
+    timestamp=datetime(year=2020, month=7, day=14, hour=16, minute=46),
     drivers=[
         drivers.DriverShares(
             hash_id="b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9",
@@ -68,8 +53,8 @@ online_quarter_hourly_request = drivers.ControlBody(
 )
 
 on_order_request = drivers.ControlBody(
-    timestamp="2020-07-14T16:46:00Z",
-    start="2020-07-14T17:46:00Z",
+    timestamp=datetime(year=2020, month=7, day=14, hour=16, minute=46),
+    start=datetime(year=2020, month=7, day=14, hour=17, minute=46),
     drivers=[
         drivers.DriverShares(
             hash_id="c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894",

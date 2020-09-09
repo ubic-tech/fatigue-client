@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -19,8 +20,8 @@ class DriverShares(BaseModel):
 
 
 class ControlBody(BaseModel):
-    timestamp: str
-    start: Optional[str]
+    timestamp: datetime
+    start: Optional[datetime]
     chain: List[UUID]  # UUID
     drivers: List[DriverShares]
 
@@ -32,5 +33,5 @@ class DriverFatigue(BaseModel):
 
 
 class FatigueBody(BaseModel):
-    timestamp: str
+    timestamp: datetime
     drivers: List[DriverFatigue]
