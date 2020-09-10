@@ -6,8 +6,12 @@ from typing import List, Optional
 
 
 class EndpointInfo(BaseModel):
-    id: str
+    id: UUID
     endpoint: str
+
+
+class EndpointRequest(BaseModel):
+    identifiers: List[UUID]
 
 
 class EndpointResponse(BaseModel):
