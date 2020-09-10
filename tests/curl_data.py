@@ -29,7 +29,7 @@ online_hourly_request = drivers.ControlBody(
             hash_id="db3defda18fafc0c197740438051c690d98b551a7e449d66390d38fa2db09b77",
             shares=[1])
     ],
-    chain=[UUID("8704d129-1af0-489e-b761-d40344c12e70"),
+    chain=[UUID("777aaaaa-1af0-489e-b761-d40344c12e70"),
            UUID("0075c51d-3df1-4d2b-8d98-66cbd25af2a0"),
            UUID("431cb246-683d-4ed7-a9fd-4384c72d3604")]
 )
@@ -47,7 +47,7 @@ online_quarter_hourly_request = drivers.ControlBody(
             hash_id="6cb6d4b2fa122bf8bd63280061e4a230565fdec3ce03268caa2f48ccd931c691",
             shares=[0, 0, 1, 1])
     ],
-    chain=["8704d129-1af0-489e-b761-d40344c12e70",
+    chain=["777aaaaa-1af0-489e-b761-d40344c12e70",
            "0075c51d-3df1-4d2b-8d98-66cbd25af2a0",
            "431cb246-683d-4ed7-a9fd-4384c72d3604"]
 )
@@ -66,7 +66,7 @@ on_order_request = drivers.ControlBody(
             hash_id="624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
             shares=[7])
     ],
-    chain=["8704d129-1af0-489e-b761-d40344c12e70",
+    chain=["777aaaaa-1af0-489e-b761-d40344c12e70",
            "0075c51d-3df1-4d2b-8d98-66cbd25af2a0",
            "431cb246-683d-4ed7-a9fd-4384c72d3604"]
 )
