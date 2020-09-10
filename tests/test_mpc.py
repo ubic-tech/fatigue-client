@@ -1,10 +1,12 @@
 from random import randint, seed
 from datetime import datetime
+from uuid import UUID
+
+from hypothesis import given, strategies as st
+from typing import List, Dict, Iterable
 
 from core.mpc import continue_mpc, finalize_mpc
 from models.drivers import DriverShares
-
-from typing import List
 
 
 def setup_module(_):
@@ -31,8 +33,10 @@ my_data_sets = [
 ]
 
 
-def get_request_data(hash_ids: List[str], shares_count: int)\
-        -> List[DriverShares]:
+def get_request_data(
+        hash_ids: Iterable[str],
+        shares_count: int
+) -> List[DriverShares]:
     return [
         DriverShares(hash_id=h, shares=[
             randint(-1000, 1000) for _ in range(shares_count)
@@ -79,10 +83,37 @@ def finalize_mpc_helper(request_data, my_data, shares_count):
     finalize_mpc_validator(request_data, my_data, shares_count, processed_request_data)
 
 
-def test_mpc():
+def notest_mpc():
     for my_data in my_data_sets:
         shares_count = len(my_data[drivers_hash_ids[0]])  # lens should be equal
         request_data = get_request_data(drivers_hash_ids, shares_count)
 
         continue_mpc_helper(request_data, my_data, shares_count)
         finalize_mpc_helper(request_data, my_data, shares_count)
+
+
+def compute(data: Dict[str, List[int]], shares_count: int):
+    data = {str(k): v for k, v in data.items()}
+    request_data = get_request_data(data.keys(), shares_count)
+    continue_mpc_helper(request_data, data, shares_count)
+    finalize_mpc_helper(request_data, data, shares_count)
+
+
+@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=0, max_size=0)))
+def test_0_share(data: Dict[str, List[int]]):
+    compute(data, 0)
+
+
+@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=1, max_size=1)))
+def test_1_share(data: Dict[str, List[int]]):
+    compute(data, 1)
+
+
+@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=4, max_size=4)))
+def test_4_shares(data: Dict[str, List[int]]):
+    compute(data, 4)
+
+
+@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=24, max_size=24)))
+def test_24_shares(data: Dict[str, List[int]]):
+    compute(data, 24)
