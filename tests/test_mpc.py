@@ -1,6 +1,5 @@
 from random import randint, seed
 from datetime import datetime
-from uuid import UUID
 
 from hypothesis import given, strategies as st
 from typing import List, Dict, Iterable
@@ -11,26 +10,6 @@ from models.drivers import DriverShares
 
 def setup_module(_):
     seed(datetime.now().microsecond)
-
-
-drivers_hash_ids = [x for x in "qwertyuiopasdfghjklzxcvbnm!@#$%^&*(()_+{}<>?/.,1234567890"]
-my_data_sets = [
-    {h: [randint(0, 1), ] for h in drivers_hash_ids},
-    {h: [randint(-100, 100), ] for h in drivers_hash_ids},
-    {h: [randint(0, 1) for _ in range(2)] for h in drivers_hash_ids},
-    {h: [randint(-100, 100) for _ in range(2)] for h in drivers_hash_ids},
-    {h: [randint(0, 1) for _ in range(4)] for h in drivers_hash_ids},
-    {h: [randint(-100, 100) for _ in range(4)] for h in drivers_hash_ids},
-    {h: [randint(0, 1) for _ in range(24)] for h in drivers_hash_ids},
-    {h: [randint(-100, 100) for _ in range(24)] for h in drivers_hash_ids},
-    {h: [randint(0, 1) for _ in range(101)] for h in drivers_hash_ids},
-    {h: [randint(-1000, 1000) for _ in range(101)] for h in drivers_hash_ids},
-    {h: [randint(0, 1) for _ in range(1010)] for h in drivers_hash_ids},
-    # severe tests below
-    # {h: [randint(-1000, 1000) for _ in range(1010)] for h in drivers_hash_ids},
-    # {h: [randint(0, 1) for _ in range(10**5 + 1)] for h in drivers_hash_ids},
-    # {h: [randint(-(10**24), 10**24) for _ in range(10**5 - 1)] for h in drivers_hash_ids},
-]
 
 
 def get_request_data(
@@ -44,59 +23,38 @@ def get_request_data(
     ]
 
 
-def continue_mpc_validator(request_data, my_data, shares_count, processed_request_data, for_ubic):
-    assert len(for_ubic) == len(processed_request_data)
+def continue_mpc_validator(request_data, my_data, shares_count):
+    for_ubic, for_next_aggr = continue_mpc(request_data, my_data)
+    assert len(for_ubic) == len(for_next_aggr)
 
-    for r, p, u in zip(request_data, processed_request_data, for_ubic):
-        assert p.hash_id == u.hash_id == r.hash_id
-        assert len(p.shares) == len(u.shares) == len(r.shares) == shares_count
-        hash_id = p.hash_id
+    for r, a, u in zip(request_data, for_next_aggr, for_ubic):
+        assert a.hash_id == u.hash_id == r.hash_id
+        assert len(a.shares) == len(u.shares) == len(r.shares) == shares_count
+        hash_id = a.hash_id
         db_shares = my_data[hash_id]
         assert shares_count == len(db_shares)
         for i in range(shares_count):
-            web_part = u.shares[i] + p.shares[i]
+            web_part = u.shares[i] + a.shares[i]
             db_part = r.shares[i] + db_shares[i]
             assert web_part == db_part
 
 
-def continue_mpc_helper(request_data, my_data, shares_count):
-    for_ubic, processed_request_data = continue_mpc(request_data, my_data)
-    continue_mpc_validator(request_data,
-                           my_data,
-                           shares_count,
-                           processed_request_data,
-                           for_ubic)
-
-
-def finalize_mpc_validator(request_data, my_data, shares_count, processed_request_data):
-    for r, p in zip(request_data, processed_request_data):
-        assert r.hash_id == p.hash_id
+def finalize_mpc_validator(request_data, my_data, shares_count):
+    for_next_aggr = finalize_mpc(request_data, my_data)
+    for r, a in zip(request_data, for_next_aggr):
+        assert r.hash_id == a.hash_id
         hash_id = r.hash_id
         db_shares = my_data[hash_id]
-        assert len(db_shares) == len(r.shares) == len(p.shares) == shares_count
+        assert len(db_shares) == len(r.shares) == len(a.shares) == shares_count
         for i in range(shares_count):
-            assert db_shares[i] + r.shares[i] == p.shares[i]
-
-
-def finalize_mpc_helper(request_data, my_data, shares_count):
-    processed_request_data = finalize_mpc(request_data, my_data)
-    finalize_mpc_validator(request_data, my_data, shares_count, processed_request_data)
-
-
-def notest_mpc():
-    for my_data in my_data_sets:
-        shares_count = len(my_data[drivers_hash_ids[0]])  # lens should be equal
-        request_data = get_request_data(drivers_hash_ids, shares_count)
-
-        continue_mpc_helper(request_data, my_data, shares_count)
-        finalize_mpc_helper(request_data, my_data, shares_count)
+            assert db_shares[i] + r.shares[i] == a.shares[i]
 
 
 def compute(data: Dict[str, List[int]], shares_count: int):
     data = {str(k): v for k, v in data.items()}
     request_data = get_request_data(data.keys(), shares_count)
-    continue_mpc_helper(request_data, data, shares_count)
-    finalize_mpc_helper(request_data, data, shares_count)
+    continue_mpc_validator(request_data, data, shares_count)
+    finalize_mpc_validator(request_data, data, shares_count)
 
 
 @given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=0, max_size=0)))
