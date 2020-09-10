@@ -1,11 +1,4 @@
-from hashlib import sha256
-
 from utils.config import env_config
-
-
-def generate_id(x: str) -> str:
-    return sha256(x.encode('utf-8')).hexdigest()
-
 
 PREFIX_URL = "/v1"
 
