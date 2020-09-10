@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Header, APIRouter, Request
 from cachetools.func import ttl_cache
 from pydantic.error_wrappers import ValidationError
@@ -23,7 +25,7 @@ async def get_endpoint_by_uuid(uuid) -> str:
         raise OperationError
 
 
-def get_next_endpoint_uuid(chain: drivers.List[str], my_uuid: str) -> str:
+def get_next_endpoint_uuid(chain: drivers.List[UUID], my_uuid: str) -> str:
     """
     Pops AggrConf.AGGR_HASH_ID from the chain
     the 1st hash ID is expected to be AggrConf.AGGR_UUID
@@ -60,9 +62,9 @@ async def process(x_request_id, req_body, path, data_extractor,
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     my_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)
     next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain,
-                                                str(AggrConf.AGGR_UUID))
+                                                AggrConf.AGGR_UUID)
     if len(next_endpoint_uuid):
-        # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
+        next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
         # await request(next_endpoint+path, headers=headers, json=for_next_aggr)
         # await request(ubic_shares_route, headers=headers, json=for_ubic)

@@ -22,7 +22,7 @@ class DriverShares(BaseModel):
 class ControlBody(BaseModel):
     timestamp: datetime
     start: Optional[datetime]
-    chain: List[UUID]  # UUID
+    chain: List[UUID]
     drivers: List[DriverShares]
 
 
