@@ -1,10 +1,12 @@
+from datetime import datetime
+from random import seed
+
 from fastapi import FastAPI
 from utils.utils import OperationError
 from starlette.responses import JSONResponse
+
 from routers import drivers, health
 from config import AggregatorConfig, PREFIX_URL
-from datetime import datetime
-from random import seed
 
 
 #  uvicorn main:app  --port 8080
