@@ -35,3 +35,8 @@ class DriverFatigue(BaseModel):
 class FatigueBody(BaseModel):
     timestamp: datetime
     drivers: List[DriverFatigue]
+
+
+class SharesBody(BaseModel):
+    next: UUID
+    drivers: List[DriverShares]

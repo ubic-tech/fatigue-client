@@ -66,11 +66,16 @@ async def process(x_request_id, req_body, path, data_extractor,
                                                     AggrConf.AGGR_UUID):
         # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        # await request(next_endpoint+path, headers=headers, json=for_next_aggr)
+        # r = await request(next_endpoint+path, headers=headers, json=for_next_aggr)
     else:
+        # r = common.SUCCESS
         for_ubic = finalize_mpc(req_body.drivers, my_data)
 
-    # await request(ubic_shares_route, headers=headers, json=for_ubic)
+    r = common.SUCCESS  # DBG
+    if r == common.SUCCESS:
+        shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
+        # await request(ubic_shares_route, headers=headers, json=shares_body.json())
+
     return common.SUCCESS
 
 
