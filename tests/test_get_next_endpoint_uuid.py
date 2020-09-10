@@ -52,5 +52,5 @@ def test_not_found():
 
 def test_last():
     chain = [MY_UUID, ]
-    assert get_next_endpoint_uuid(chain, MY_UUID_STR) == ""
+    assert get_next_endpoint_uuid(chain, MY_UUID_STR) is None
     assert chain == []

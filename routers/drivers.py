@@ -25,7 +25,7 @@ async def get_endpoint_by_uuid(uuid) -> str:
         raise OperationError
 
 
-def get_next_endpoint_uuid(chain: drivers.List[UUID], my_uuid: str) -> str:
+def get_next_endpoint_uuid(chain: drivers.List[UUID], my_uuid: str):
     """
     Pops AggrConf.AGGR_HASH_ID from the chain
     the 1st hash ID is expected to be AggrConf.AGGR_UUID
@@ -43,7 +43,7 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID], my_uuid: str) -> str:
     try:  # try getting next aggr in chain
         return str(chain[0])  # return the next endpoint's uuid
     except IndexError:  # means 'I' am the last aggregator in the chain
-        return ""
+        return None
 
 
 async def process(x_request_id, req_body, path, data_extractor,
@@ -61,17 +61,16 @@ async def process(x_request_id, req_body, path, data_extractor,
     ts = req_body.timestamp
     drivers_hash_ids = [d.hash_id for d in req_body.drivers]
     my_data = data_extractor(drivers_hash_ids, ts, *data_extractor_params)
-    next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain,
-                                                AggrConf.AGGR_UUID)
-    if len(next_endpoint_uuid):
-        # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
+
+    if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
+                                                    AggrConf.AGGR_UUID):
+        next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        # await request(next_endpoint+path, headers=headers, json=for_next_aggr)
-        # await request(ubic_shares_route, headers=headers, json=for_ubic)
+        await request(next_endpoint+path, headers=headers, json=for_next_aggr)
     else:
         for_ubic = finalize_mpc(req_body.drivers, my_data)
-        # await request(ubic_shares_route, headers=headers, json=for_ubic)
 
+    await request(ubic_shares_route, headers=headers, json=for_ubic)
     return common.SUCCESS
 
 
