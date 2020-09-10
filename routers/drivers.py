@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import Header, APIRouter, Request
 from cachetools.func import ttl_cache
 from pydantic.error_wrappers import ValidationError
+# from aiocache import cached
 
 from utils.utils import request, OperationError
 from models import drivers, common
@@ -15,10 +16,12 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
                           AggrConf.AGGR_NAME)
 
 
-@ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
+#@ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
+#@cached(ttl=AggrConf.ENDPOINTS_TTL)
 async def get_endpoint_by_uuid(uuid) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
-    resp = await request(route, json={"identifiers": [uuid, ]})
+    endpoints_request = drivers.EndpointRequest(identifiers=[UUID(uuid)])
+    resp = await request(route, data=endpoints_request.json())
     try:
         return drivers.EndpointResponse(**resp).endpoints[0].endpoint
     except (ValidationError, IndexError):
@@ -64,9 +67,10 @@ async def process(x_request_id, req_body, path, data_extractor,
 
     if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
                                                     AggrConf.AGGR_UUID):
-        # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
+        next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        # r = await request(next_endpoint+path, headers=headers, json=for_next_aggr)
+        # bug!!! todo: prepare ControlBody for next aggr
+        # r = await request(next_endpoint+path, headers=headers, data=for_next_aggr)
     else:
         # r = common.SUCCESS
         for_ubic = finalize_mpc(req_body.drivers, my_data)
@@ -74,7 +78,7 @@ async def process(x_request_id, req_body, path, data_extractor,
     r = common.SUCCESS  # DBG
     if r == common.SUCCESS:
         shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
-        # await request(ubic_shares_route, headers=headers, json=shares_body.json())
+        # await request(ubic_shares_route, headers=headers, data=shares_body.json())
 
     return common.SUCCESS
 
