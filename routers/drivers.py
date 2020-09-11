@@ -16,8 +16,8 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
                           AggrConf.AGGR_NAME)
 
 
-#@ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
-#@cached(ttl=AggrConf.ENDPOINTS_TTL)
+# @ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
+# @cached(ttl=AggrConf.ENDPOINTS_TTL)
 async def get_endpoint_by_uuid(uuid) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
     endpoints_request = drivers.EndpointRequest(identifiers=[UUID(uuid)])
@@ -66,21 +66,22 @@ async def process(x_request_id, req_body, path, data_extractor, *start):
     chain = req_body.chain
     if next_endpoint_uuid := get_next_endpoint_uuid(chain,
                                                     AggrConf.AGGR_UUID):
-        next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
+        # next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
         ctrl_body = drivers.ControlBody(timestamp=ts,
                                         chain=chain,
                                         drivers=for_next_aggr)
         if start:
             ctrl_body.start = start
-        r = await request(next_endpoint+path, headers=headers, data=ctrl_body.json())
+        # r = await request(next_endpoint + path, headers=headers, data=ctrl_body.json())
     else:
         r = common.SUCCESS
         for_ubic = finalize_mpc(req_body.drivers, my_data)
 
+    r = common.SUCCESS  # DBG
     if r == common.SUCCESS:
         shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
-        await request(ubic_shares_route, headers=headers, data=shares_body.json())
+        # await request(ubic_shares_route, headers=headers, data=shares_body.json())
 
     return common.SUCCESS
 
@@ -98,12 +99,24 @@ def fatigue(raw_request: Request,
              response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def online_hourly(raw_request: Request,
-                        online_hourly_data: drivers.ControlBody,
+                        online_history_data: drivers.ControlBody,
                         x_request_id: str = Header(...)):
+    return await process(x_request_id,
+                         online_history_data,
+                         raw_request.url.path,
+                         db.get_hourly)
+
+
+@router.post("/drivers/online/history_hourly",
+             response_model=common.StatusResponse,
+             response_model_exclude_unset=True)
+async def history_hourly(raw_request: Request,
+                         online_hourly_data: drivers.ControlBody,
+                         x_request_id: str = Header(...)):
     return await process(x_request_id,
                          online_hourly_data,
                          raw_request.url.path,
-                         db.get_hourly)
+                         db.get_history_hourly)
 
 
 @router.post("/drivers/online/quarter_hourly",
