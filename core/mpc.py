@@ -1,5 +1,4 @@
-from sys import maxsize
-from random import randint
+from random import randrange
 
 from typing import List, Mapping
 
@@ -7,15 +6,18 @@ from repository.drivers_repository import DriverID, Share
 from models.drivers import DriverShares
 
 
-def get_rand_pair(base: int) -> (int, int):
+MODULO = 999983
+
+
+def get_rand_pair(secret: int) -> (int, int):
     """
-    return a pair of random integers so that their sum == base
-    :param base: integer to be splitted into 2 components
+    return a pair of random integers so that their sum == secret
+    :param secret: integer to be split into 2 shares
     :return: a pair of base's components
     """
-    f = randint(-maxsize, maxsize)
-    s = base - f
-    return (f, s) if randint(0, 1) else (s, f)
+    share0 = randrange(MODULO)
+    share1 = (secret - share0) % MODULO
+    return share0, share1
 
 
 def continue_mpc(

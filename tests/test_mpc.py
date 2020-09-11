@@ -6,6 +6,7 @@ from typing import List, Dict, Iterable
 
 from core.mpc import continue_mpc, finalize_mpc
 from models.drivers import DriverShares
+from core.mpc import MODULO
 
 
 def setup_module(_):
@@ -25,6 +26,11 @@ def get_request_data(
 
 def continue_mpc_validator(request_data, my_data, shares_count):
     for_ubic, for_next_aggr = continue_mpc(request_data, my_data)
+    print("*****request_data: ", request_data)
+    print("*****my_data: ", my_data)
+    print("*****for_ubic: ", for_ubic)
+    print("*****for_next_aggr: ", for_next_aggr)
+
     assert len(for_ubic) == len(for_next_aggr)
 
     for r, a, u in zip(request_data, for_next_aggr, for_ubic):
@@ -36,7 +42,8 @@ def continue_mpc_validator(request_data, my_data, shares_count):
         for i in range(shares_count):
             web_part = u.shares[i] + a.shares[i]
             db_part = r.shares[i] + db_shares[i]
-            assert web_part == db_part
+            print(u.shares[i], a.shares[i], "==", r.shares[i], db_shares[i], "\n\n")
+            assert web_part % MODULO == db_part % MODULO
 
 
 def finalize_mpc_validator(request_data, my_data, shares_count):
@@ -47,7 +54,7 @@ def finalize_mpc_validator(request_data, my_data, shares_count):
         db_shares = my_data[hash_id]
         assert len(db_shares) == len(r.shares) == len(a.shares) == shares_count
         for i in range(shares_count):
-            assert db_shares[i] + r.shares[i] == a.shares[i]
+            assert (db_shares[i] + r.shares[i]) % MODULO == a.shares[i] % MODULO
 
 
 def compute(data: Dict[str, List[int]], shares_count: int):
