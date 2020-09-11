@@ -8,7 +8,7 @@ COPY . /usr/src/app/
 
 RUN pip install -r /usr/src/app/requirements.txt
 
-EXPOSE 9090
+#EXPOSE 9090
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9090"]
 

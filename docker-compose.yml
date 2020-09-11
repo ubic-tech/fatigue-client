@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  db:
+     image: yandex/clickhouse-server
+     ports:
+     - "8123:8123"
+     - "9000:9000"
+     - "9009:9009"
+     
+     ulimits:
+      nproc: 65535
+      nofile:
+       soft: 262144
+       hard: 262144
+
+  yandex:
+    build: .
+    environment:
+      CLICK_HOUSE_URL: "db"
+      AGGR_NAME: "Yandex"
+      AGGR_UUID: "777aaaaa-1af0-489e-b761-d40344c12e70"
+      
+  city:
+    build: .
+    environment:
+      CLICK_HOUSE_URL: "db"
+      AGGR_NAME: "City"
+      AGGR_UUID: "29908872-5034-48b9-8871-37dac2d085ad"
+  
+  gett:
+    build: .
+    environment:
+      CLICK_HOUSE_URL: "db"
+      AGGR_NAME: "Gett"
+      AGGR_UUID: "e3ba4e06-88bd-4f5b-92bb-42ebd9d34501"
+
+networks:
+  default:
+    external:
+      name: taxi-net
