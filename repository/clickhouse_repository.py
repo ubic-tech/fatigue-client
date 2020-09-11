@@ -3,7 +3,7 @@ from typing import Mapping, Iterable
 
 from clickhouse_driver import Client
 
-from drivers_repository import DriverID, Share, DriversRepository
+from repository.drivers_repository import DriverID, Share, DriversRepository
 
 
 def init_static(cls):
