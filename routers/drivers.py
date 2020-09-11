@@ -73,15 +73,14 @@ async def process(x_request_id, req_body, path, data_extractor, *start):
                                         drivers=for_next_aggr)
         if start:
             ctrl_body.start = start
-        # r = await request(next_endpoint+path, headers=headers, data=ctrl_body.json())
+        r = await request(next_endpoint+path, headers=headers, data=ctrl_body.json())
     else:
-        # r = common.SUCCESS
+        r = common.SUCCESS
         for_ubic = finalize_mpc(req_body.drivers, my_data)
 
-    r = common.SUCCESS  # DBG
     if r == common.SUCCESS:
         shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
-        # await request(ubic_shares_route, headers=headers, data=shares_body.json())
+        await request(ubic_shares_route, headers=headers, data=shares_body.json())
 
     return common.SUCCESS
 
