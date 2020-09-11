@@ -29,6 +29,14 @@ def test_online_hourly():
     assert response.json() == EXPECTED
 
 
+def test_online_history_hourly():
+    response = client.post("/v1/drivers/online/history_hourly",
+                           headers=headers,
+                           data=history_hourly_request.json())
+    assert response.status_code == 200
+    assert response.json() == EXPECTED
+
+
 def test_online_quarter_hourly():
     response = client.post("/v1/drivers/online/quarter_hourly",
                            headers=headers,
