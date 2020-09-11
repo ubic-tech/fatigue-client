@@ -6,7 +6,7 @@ import sys
 import click
 import numpy as np
 
-from repo_filler.states import Rest, Profile, OrderState
+from states import Rest, Profile, OrderState
 
 
 def create_profile() -> Profile:
