@@ -26,14 +26,14 @@ services:
     environment:
       CLICK_HOUSE_URL: "db"
       AGGR_NAME: "City"
-      AGGR_UUID: "29908872-5034-48b9-8871-37dac2d085ad"
+      AGGR_UUID: "888aaaaa-1af0-489e-b761-d40344c12e70"
   
   gett:
     build: .
     environment:
       CLICK_HOUSE_URL: "db"
       AGGR_NAME: "Gett"
-      AGGR_UUID: "e3ba4e06-88bd-4f5b-92bb-42ebd9d34501"
+      AGGR_UUID: "999aaaaa-1af0-489e-b761-d40344c12e70"
 
 networks:
   default:
