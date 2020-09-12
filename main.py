@@ -25,7 +25,7 @@ for r in (drivers.router, health.router):
 @app.on_event("startup")
 async def init_app():
     seed(datetime.now().microsecond)
-    print(AggregatorConfig.AGGR_NAME, " started, hash id == ",
+    print(AggregatorConfig.AGGR_NAME, " started, uuid == ",
           AggregatorConfig.AGGR_UUID)
 
 

@@ -42,5 +42,5 @@ class FatigueBody(BaseModel):
 
 
 class SharesBody(BaseModel):
-    next: UUID
+    next: Optional[UUID]
     drivers: List[DriverShares]
