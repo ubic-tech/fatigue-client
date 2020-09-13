@@ -1,8 +1,8 @@
 from datetime import datetime
-
 from typing import Mapping, Iterable
 
 from clickhouse_driver import Client
+
 from repository.drivers_repository import DriverID, Share, DriversRepository
 
 
@@ -13,6 +13,7 @@ def init_static(cls):
 
 @init_static
 class ClickhouseRepository(DriversRepository):
+
     _history_conditions: str = ''
 
     @classmethod
@@ -20,9 +21,9 @@ class ClickhouseRepository(DriversRepository):
         conditions = []
         for h in reversed(range(1, 25)):
             conditions.append(
-                "countIf(timestamp between toStartOfFifteenMinutes(toDateTime('{0}')) - " +
+                'countIf(timestamp between toStartOfFifteenMinutes(toDateTime(%(start)s)) - ' +
                 f"INTERVAL {59 * h} MINUTE " +
-                "and toStartOfFifteenMinutes(toDateTime('{0}')) - " +
+                'and toStartOfFifteenMinutes(toDateTime(%(start)s)) - ' +
                 f"INTERVAL {59 * (h - 1)} MINUTE)"
             )
         cls._history_conditions = ',\n'.join(conditions)
@@ -39,69 +40,100 @@ class ClickhouseRepository(DriversRepository):
         return d
 
     def get_drivers(self) -> Iterable[DriverID]:
-        _q = 'select distinct driver from default.drivers'
-        return self._client.execute(_q, columnar=True)[0]
+
+        return self._client.execute(
+            query='SELECT DISTINCT driver from drivers',
+            columnar=True
+        )[0]
 
     def get_hourly(self,
                    drivers: Iterable[DriverID],
                    start: datetime) -> Mapping[DriverID, Iterable[Share]]:
-        _r15 = 'toStartOfFifteenMinutes'
-        _q = (
-            'SELECT'
-            '  driver,'
-            f" countIf(timestamp between {_r15}(toDateTime('{start}')) - INTERVAL 59 MINUTE" 
-            f" and {_r15}(toDateTime('{start}'))) as h "
-            'FROM drivers'
-            f"  WHERE driver in {drivers} and state = '{self._operator}' "
-            'GROUP BY driver'
-        )
-        return self.make_dict(self._client.execute_iter(_q))
+
+        return self.make_dict(self._client.execute_iter(
+            query=(
+                'SELECT'
+                '  driver,'
+                '  countIf(timestamp between '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 59 MINUTE' 
+                '    and toStartOfFifteenMinutes(toDateTime(%(start)s))) as h '
+                'FROM drivers'
+                '  WHERE driver in %(drivers)s and state = %(state)s '
+                'GROUP BY driver'
+            ),
+            params={
+                'start': start,
+                'drivers': drivers,
+                'state': self._operator,
+            }
+        ))
 
     def get_on_order(self,
                      drivers: Iterable[DriverID],
                      start: datetime, end: datetime) -> Mapping[DriverID, Iterable[Share]]:
-        _r15 = 'toStartOfFifteenMinutes'
-        _q = (
-            'SELECT'
-            '  driver,'
-            f" countIf(timestamp between {_r15}(toDateTime('{start}')) and"
-            f" {_r15}(toDateTime('{end}'))) as duration "
-            'FROM drivers'
-            f"  WHERE driver in {drivers} and state = '{self._operator}' "
-            'GROUP BY driver'
-        )
-        return self.make_dict(self._client.execute_iter(_q), norm=False)
+
+        return self.make_dict(self._client.execute_iter(
+            query=(
+                'SELECT'
+                '  driver,'
+                '  countIf(timestamp between '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) and '
+                '    toStartOfFifteenMinutes(toDateTime(%(end)s))) as duration '
+                'FROM drivers'
+                '  WHERE driver in %(drivers)s and state = %(state)s '
+                'GROUP BY driver'
+            ),
+            params={
+                'start': start,
+                'end': end,
+                'drivers': drivers,
+                'state': self._operator,
+            }
+        ), norm=False)
 
     def get_quarter_hourly(self,
                            drivers: Iterable[DriverID],
                            start: datetime) -> Mapping[DriverID, Iterable[Share]]:
 
-        _r15 = 'toStartOfFifteenMinutes'
-        _q = (
-            'SELECT'
-            '  driver,'
-            f"  countIf({_r15}(timestamp) = {_r15}(toDateTime('{start}')) - INTERVAL 1 HOUR) as i1,"
-            f"  countIf({_r15}(timestamp) = {_r15}(toDateTime('{start}')) - INTERVAL 45 MINUTE) as i2,"
-            f"  countIf({_r15}(timestamp) = {_r15}(toDateTime('{start}')) - INTERVAL 30 MINUTE) as i3,"
-            f"  countIf({_r15}(timestamp) = {_r15}(toDateTime('{start}')) - INTERVAL 30 MINUTE) as i4 "
-            'FROM drivers'
-            f"  WHERE driver in {drivers} and state = '{self._operator}' "
-            'GROUP BY driver'
-        )
-
-        return self.make_dict(self._client.execute_iter(_q))
+        return self.make_dict(self._client.execute_iter(
+            query=(
+                'SELECT'
+                '  driver,'
+                '  countIf(toStartOfFifteenMinutes(timestamp) = '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 1 HOUR) as i1,'
+                '  countIf(toStartOfFifteenMinutes(timestamp) = '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 45 MINUTE) as i2,'
+                '  countIf(toStartOfFifteenMinutes(timestamp) = '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 30 MINUTE) as i3,'
+                '  countIf(toStartOfFifteenMinutes(timestamp) = '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 30 MINUTE) as i4 '
+                'FROM drivers'
+                '  WHERE driver in %(drivers)s and state = %(state)s '
+                'GROUP BY driver'
+            ),
+            params={
+                'start': start,
+                'drivers': drivers,
+                'state': self._operator,
+            }
+        ))
 
     def get_history_hourly(self,
                            drivers: Iterable[DriverID],
                            start: datetime) -> Mapping[DriverID, Iterable[Share]]:
 
-        _q = (
-            'SELECT'
-            '  driver,'
-            f' {self._history_conditions.format(start)} '
-            'FROM drivers '
-            f" WHERE driver in {drivers} and state = '{self._operator}' "
-            'GROUP BY driver'
-        )
-
-        return self.make_dict(self._client.execute_iter(_q))
+        return self.make_dict(self._client.execute_iter(
+            query=(
+                'SELECT'
+                '  driver,'
+                f" {self._history_conditions} "
+                'FROM drivers '
+                '  WHERE driver in %(drivers)s and state = %(state)s '
+                'GROUP BY driver'
+            ),
+            params={
+                'start': start,
+                'drivers': drivers,
+                'state': self._operator,
+            }
+        ))

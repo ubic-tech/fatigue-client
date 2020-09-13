@@ -2,3 +2,7 @@ venv
 __pycache__
 .idea
 .hypothesis
+.venv/
+aggregator.srctrlbm
+aggregator.srctrldb
+aggregator.srctrlprj

@@ -24,8 +24,8 @@ class DriverShares(BaseModel):
 
 
 class ControlBody(BaseModel):
-    timestamp: datetime
-    start: Optional[datetime]
+    start: datetime
+    end: Optional[datetime]
     chain: List[UUID]
     drivers: List[DriverShares]
 
@@ -42,5 +42,5 @@ class FatigueBody(BaseModel):
 
 
 class SharesBody(BaseModel):
-    next: UUID
+    next: Optional[UUID]
     drivers: List[DriverShares]

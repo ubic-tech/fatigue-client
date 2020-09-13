@@ -34,6 +34,24 @@ online_hourly_request = drivers.ControlBody(
            UUID("999aaaaa-1af0-489e-b761-d40344c12e70")]
 )
 
+history_hourly_request = drivers.ControlBody(
+    timestamp=datetime(year=2020, month=7, day=14, hour=16, minute=46),
+    drivers=[
+        drivers.DriverShares(
+            hash_id="c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894",
+            shares=[0 for _ in range(24)]),
+        drivers.DriverShares(
+            hash_id="0dfcddb0440e967f05bb68ca09a5e2188b8abc36bfb5b95b83b88be59c42c6e7",
+            shares=[0 for _ in range(24)]),
+        drivers.DriverShares(
+            hash_id="624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
+            shares=[0 for _ in range(24)])
+    ],
+    chain=["777aaaaa-1af0-489e-b761-d40344c12e70",
+           "888aaaaa-1af0-489e-b761-d40344c12e70",
+           "999aaaaa-1af0-489e-b761-d40344c12e70"]
+)
+
 online_quarter_hourly_request = drivers.ControlBody(
     timestamp=datetime(year=2020, month=7, day=14, hour=16, minute=46),
     drivers=[

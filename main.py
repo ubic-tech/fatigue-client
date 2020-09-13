@@ -2,7 +2,7 @@ from datetime import datetime
 from random import seed
 
 from fastapi import FastAPI
-from utils.utils import OperationError
+from utils.utils import OperationError, StatusError
 from starlette.responses import JSONResponse
 
 from routers import drivers, health
@@ -18,6 +18,11 @@ async def attribute_exists(request, exc):
     return JSONResponse({"error": str(exc)}, status_code=503)
 
 
+@app.exception_handler(StatusError)
+async def attribute_exists(request, exc):
+    return JSONResponse({"error": str(exc)}, status_code=503)
+
+
 for r in (drivers.router, health.router):
     app.include_router(r, prefix=PREFIX_URL)
 
@@ -25,8 +30,9 @@ for r in (drivers.router, health.router):
 @app.on_event("startup")
 async def init_app():
     seed(datetime.now().microsecond)
-    print(AggregatorConfig.AGGR_NAME, " started, hash id == ",
-          AggregatorConfig.AGGR_UUID)
+    print(AggregatorConfig.AGGR_NAME, " started, uuid == ",
+          AggregatorConfig.AGGR_UUID,
+          " CH_URL: ", AggregatorConfig.CLICK_HOUSE_URL)
 
 
 @app.on_event("shutdown")
