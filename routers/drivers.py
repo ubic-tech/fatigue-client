@@ -49,7 +49,7 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID], my_uuid: str):
         return None
 
 
-async def process(x_request_id, req_body, path, data_extractor, *end):
+async def process(x_request_id, req_body, path, data_extractor):
     """
     organizes strategy of MPC and web request forwarding
     :param x_request_id: header from request to be forwarded
@@ -60,19 +60,22 @@ async def process(x_request_id, req_body, path, data_extractor, *end):
     """
     headers = {"X-Request-Id": x_request_id, }
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
-    ts = req_body.start
-    drivers_hash_ids = [d.hash_id for d in req_body.drivers]  # take keys
-    my_data = data_extractor(drivers_hash_ids, ts, *end)
+    start = req_body.start
+    drivers_hash_ids = [d.hash_id for d in req_body.drivers]
+    if req_body.end:
+        my_data = data_extractor(drivers_hash_ids, start, req_body.end)
+    else:
+        my_data = data_extractor(drivers_hash_ids, start)
+
     chain = req_body.chain
     if next_endpoint_uuid := get_next_endpoint_uuid(chain,
                                                     AggrConf.AGGR_UUID):
         next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        ctrl_body = drivers.ControlBody(start=ts,
+        ctrl_body = drivers.ControlBody(start=start,
+                                        end=req_body.end,
                                         chain=chain,
                                         drivers=for_next_aggr)
-        if end:
-            ctrl_body.end = end
         r = await request(next_endpoint + path, headers=headers, data=ctrl_body.json())
         shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
     else:
@@ -80,7 +83,6 @@ async def process(x_request_id, req_body, path, data_extractor, *end):
         for_ubic = finalize_mpc(req_body.drivers, my_data)
         shares_body = drivers.SharesBody(drivers=for_ubic)
 
-    # r = common.SUCCESS  # DBG
     if r == common.SUCCESS:
         await request(ubic_shares_route, headers=headers, data=shares_body.json())
 
@@ -141,5 +143,4 @@ async def on_order(raw_request: Request,
     return await process(x_request_id,
                          on_order_data,
                          raw_request.url.path,
-                         db.get_on_order,
-                         on_order_data.start)
+                         db.get_on_order)
