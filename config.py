@@ -11,4 +11,4 @@ class AggregatorConfig:
     ENDPOINTS_TTL = 3600
     AGGR_NAME: str = "Yandex"
     AGGR_UUID: str = "777aaaaa-1af0-489e-b761-d40344c12e70"
-    CLICK_HOUSE_URL: str = "archy1.dc"
+    CLICK_HOUSE_URL: str

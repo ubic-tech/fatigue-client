@@ -31,7 +31,8 @@ for r in (drivers.router, health.router):
 async def init_app():
     seed(datetime.now().microsecond)
     print(AggregatorConfig.AGGR_NAME, " started, uuid == ",
-          AggregatorConfig.AGGR_UUID)
+          AggregatorConfig.AGGR_UUID,
+          " CH_URL: ", AggregatorConfig.CLICK_HOUSE_URL)
 
 
 @app.on_event("shutdown")
