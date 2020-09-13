@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Header, APIRouter, Request
+from fastapi import Header, APIRouter, Request, BackgroundTasks
 from cachetools.func import ttl_cache
 from pydantic.error_wrappers import ValidationError
 # from aiocache import cached
@@ -102,24 +102,30 @@ def fatigue(raw_request: Request,
              response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def online_hourly(raw_request: Request,
-                        online_history_data: drivers.ControlBody,
+                        online_hourly_data: drivers.ControlBody,
+                        background_tasks: BackgroundTasks,
                         x_request_id: str = Header(...)):
-    return await process(x_request_id,
-                         online_history_data,
-                         raw_request.url.path,
-                         db.get_hourly)
+    background_tasks.add_task(process,
+                              x_request_id,
+                              online_hourly_data,
+                              raw_request.url.path,
+                              db.get_hourly)
+    return common.SUCCESS
 
 
 @router.post("/drivers/online/history_hourly",
              response_model=common.StatusResponse,
              response_model_exclude_unset=True)
 async def history_hourly(raw_request: Request,
-                         online_hourly_data: drivers.ControlBody,
+                         online_history_data: drivers.ControlBody,
+                         background_tasks: BackgroundTasks,
                          x_request_id: str = Header(...)):
-    return await process(x_request_id,
-                         online_hourly_data,
-                         raw_request.url.path,
-                         db.get_history_hourly)
+    background_tasks.add_task(process,
+                              x_request_id,
+                              online_history_data,
+                              raw_request.url.path,
+                              db.get_history_hourly)
+    return common.SUCCESS
 
 
 @router.post("/drivers/online/quarter_hourly",
@@ -127,11 +133,14 @@ async def history_hourly(raw_request: Request,
              response_model_exclude_unset=True)
 async def online_quarter_hourly(raw_request: Request,
                                 online_quarter_hourly_data: drivers.ControlBody,
+                                background_tasks: BackgroundTasks,
                                 x_request_id: str = Header(...)):
-    return await process(x_request_id,
-                         online_quarter_hourly_data,
-                         raw_request.url.path,
-                         db.get_quarter_hourly)
+    background_tasks.add_task(process,
+                              x_request_id,
+                              online_quarter_hourly_data,
+                              raw_request.url.path,
+                              db.get_quarter_hourly)
+    return common.SUCCESS
 
 
 @router.post("/drivers/on_order",
@@ -139,8 +148,11 @@ async def online_quarter_hourly(raw_request: Request,
              response_model_exclude_unset=True)
 async def on_order(raw_request: Request,
                    on_order_data: drivers.ControlBody,
+                   background_tasks: BackgroundTasks,
                    x_request_id: str = Header(...)):
-    return await process(x_request_id,
-                         on_order_data,
-                         raw_request.url.path,
-                         db.get_on_order)
+    background_tasks.add_task(process,
+                              x_request_id,
+                              on_order_data,
+                              raw_request.url.path,
+                              db.get_on_order)
+    return common.SUCCESS
