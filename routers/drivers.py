@@ -1,9 +1,8 @@
 from uuid import UUID
 
 from fastapi import Header, APIRouter, Request, BackgroundTasks
-from cachetools.func import ttl_cache
 from pydantic.error_wrappers import ValidationError
-# from aiocache import cached
+from aiocache import cached
 
 from utils.utils import request, OperationError
 from models import drivers, common
@@ -16,8 +15,7 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
                           AggrConf.AGGR_NAME)
 
 
-# @ttl_cache(ttl=AggrConf.ENDPOINTS_TTL)
-# @cached(ttl=AggrConf.ENDPOINTS_TTL)
+@cached(ttl=AggrConf.ENDPOINTS_TTL)
 async def get_endpoint_by_uuid(uuid) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
     endpoints_request = drivers.EndpointRequest(identifiers=[UUID(uuid)])
