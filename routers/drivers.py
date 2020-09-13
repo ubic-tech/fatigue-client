@@ -84,7 +84,8 @@ async def process(x_request_id, req_body, path, my_data):
 
 
 def get_hash_ids(drivers_shares: List[drivers.DriverShares]
-                 ) -> Iterable[DriverID]: return [d.hash_id for d in drivers_shares]
+                 ) -> Iterable[DriverID]:
+    return [d.hash_id for d in drivers_shares]
 
 
 @router.post("/drivers/fatigue",
