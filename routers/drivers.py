@@ -49,7 +49,7 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID], my_uuid: str):
         return None
 
 
-async def process(x_request_id, req_body, path, data_extractor, *start):
+async def process(x_request_id, req_body, path, data_extractor, *end):
     """
     organizes strategy of MPC and web request forwarding
     :param x_request_id: header from request to be forwarded
@@ -60,19 +60,19 @@ async def process(x_request_id, req_body, path, data_extractor, *start):
     """
     headers = {"X-Request-Id": x_request_id, }
     ubic_shares_route = AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE
-    ts = req_body.timestamp
-    drivers_hash_ids = [d.hash_id for d in req_body.drivers]
-    my_data = data_extractor(drivers_hash_ids, ts, *start)
+    ts = req_body.start
+    drivers_hash_ids = [d.hash_id for d in req_body.drivers]  # take keys
+    my_data = data_extractor(drivers_hash_ids, ts, *end)
     chain = req_body.chain
     if next_endpoint_uuid := get_next_endpoint_uuid(chain,
                                                     AggrConf.AGGR_UUID):
         next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        ctrl_body = drivers.ControlBody(timestamp=ts,
+        ctrl_body = drivers.ControlBody(start=ts,
                                         chain=chain,
                                         drivers=for_next_aggr)
-        if start:
-            ctrl_body.start = start
+        if end:
+            ctrl_body.end = end
         r = await request(next_endpoint + path, headers=headers, data=ctrl_body.json())
         shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
     else:

@@ -2,7 +2,7 @@ from datetime import datetime
 from random import seed
 
 from fastapi import FastAPI
-from utils.utils import OperationError
+from utils.utils import OperationError, StatusError
 from starlette.responses import JSONResponse
 
 from routers import drivers, health
@@ -14,6 +14,11 @@ app = FastAPI()
 
 
 @app.exception_handler(OperationError)
+async def attribute_exists(request, exc):
+    return JSONResponse({"error": str(exc)}, status_code=503)
+
+
+@app.exception_handler(StatusError)
 async def attribute_exists(request, exc):
     return JSONResponse({"error": str(exc)}, status_code=503)
 
