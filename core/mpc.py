@@ -42,7 +42,7 @@ def continue_mpc(
         for j, share in enumerate(my_shares):
             for_ubic, for_next_aggr = get_rand_pair(int(share))
             ubic_driver_data.shares.append(for_ubic)
-            next_aggr_driver_data.shares.append((drivers[i].shares[j] + for_next_aggr))
+            next_aggr_driver_data.shares.append(drivers[i].shares[j] + for_next_aggr)
         ubic_drivers_shares.append(ubic_driver_data)
         next_aggr_drivers_shares.append(next_aggr_driver_data)
     return ubic_drivers_shares, next_aggr_drivers_shares
