@@ -59,31 +59,40 @@ async def process(x_request_id, req_body, path, my_data):
         current MPC destination
     """
     headers = {"X-Request-Id": x_request_id, }
-    r = common.ERROR
-    shares_body = None
+    next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain,
+                                                AggrConf.AGGR_UUID)
 
-    while next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
-                                                       AggrConf.AGGR_UUID):
-        next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
-        for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
-        ctrl_body = drivers.ControlBody(start=req_body.start,
-                                        end=req_body.end,
-                                        chain=req_body.chain,
-                                        drivers=for_next_aggr)
-        r = await request(next_endpoint + path, headers=headers, data=ctrl_body.json())
-        shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
-
+    # if no next endpoint simply send 'my' data += ctrl_body's to Ubic
     if not next_endpoint_uuid:
-        r = common.SUCCESS
         for_ubic = finalize_mpc(req_body.drivers, my_data)
         shares_body = drivers.SharesBody(drivers=for_ubic)
-
-    if r == common.SUCCESS:
         await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
                       headers=headers,
                       data=shares_body.json())
+        return
 
-    return common.SUCCESS
+    for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
+    ctrl_body = drivers.ControlBody(start=req_body.start,
+                                    end=req_body.end,
+                                    chain=req_body.chain,
+                                    drivers=for_next_aggr)
+    while next_endpoint_uuid:
+        next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
+
+        # keep trying to get any next endpoint's response
+        r = await request(next_endpoint + path, headers=headers, data=ctrl_body.json())
+        if common.StatusResponse(**r) != common.SUCCESS:
+            next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain,
+                                                        AggrConf.AGGR_UUID)
+            continue
+
+        #  if next responded ok I can send my shares to Ubic
+        shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
+        r = await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
+                          headers=headers,
+                          data=shares_body.json())
+        if common.StatusResponse(**r) == common.SUCCESS:
+            break
 
 
 def get_hash_ids(drivers_shares: List[drivers.DriverShares]
