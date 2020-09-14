@@ -10,7 +10,7 @@ class EndpointInfo(BaseModel):
     endpoint: str
 
 
-class EndpointRequest(BaseModel):
+class EndpointsBody(BaseModel):
     identifiers: List[UUID]
 
 
@@ -26,8 +26,8 @@ class DriverShares(BaseModel):
 class ControlBody(BaseModel):
     start: datetime
     end: Optional[datetime]
-    chain: List[UUID]
     drivers: List[DriverShares]
+    chain: List[UUID]
 
 
 class DriverFatigue(BaseModel):

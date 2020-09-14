@@ -20,7 +20,7 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
 @cached(ttl=AggrConf.ENDPOINTS_TTL)
 async def get_endpoint_by_uuid(uuid) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
-    endpoints_request = drivers.EndpointRequest(identifiers=[UUID(uuid)])
+    endpoints_request = drivers.EndpointsBody(identifiers=[UUID(uuid)])
     resp = await request(route, data=endpoints_request.json())
     try:
         return drivers.EndpointResponse(**resp).endpoints[0].endpoint
@@ -59,9 +59,11 @@ async def process(x_request_id, req_body, path, my_data):
         current MPC destination
     """
     headers = {"X-Request-Id": x_request_id, }
+    r = common.ERROR
+    shares_body = None
 
-    if next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
-                                                    AggrConf.AGGR_UUID):
+    while next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain,
+                                                       AggrConf.AGGR_UUID):
         next_endpoint = await get_endpoint_by_uuid(next_endpoint_uuid)
         for_ubic, for_next_aggr = continue_mpc(req_body.drivers, my_data)
         ctrl_body = drivers.ControlBody(start=req_body.start,
@@ -70,7 +72,8 @@ async def process(x_request_id, req_body, path, my_data):
                                         drivers=for_next_aggr)
         r = await request(next_endpoint + path, headers=headers, data=ctrl_body.json())
         shares_body = drivers.SharesBody(next=UUID(next_endpoint_uuid), drivers=for_ubic)
-    else:
+
+    if not next_endpoint_uuid:
         r = common.SUCCESS
         for_ubic = finalize_mpc(req_body.drivers, my_data)
         shares_body = drivers.SharesBody(drivers=for_ubic)
