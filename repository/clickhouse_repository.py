@@ -3,7 +3,7 @@ from typing import Mapping, Iterable
 
 from clickhouse_driver import Client
 
-from repository.drivers_repository import DriverID, Share, DriversRepository
+from drivers_repository import DriverID, Share, DriversRepository
 
 
 def init_static(cls):
@@ -22,9 +22,9 @@ class ClickhouseRepository(DriversRepository):
         for h in reversed(range(1, 25)):
             conditions.append(
                 'countIf(timestamp between toStartOfFifteenMinutes(toDateTime(%(start)s)) - ' +
-                f"INTERVAL {59 * h} MINUTE " +
+                f"INTERVAL {60 * h} MINUTE " +
                 'and toStartOfFifteenMinutes(toDateTime(%(start)s)) - ' +
-                f"INTERVAL {59 * (h - 1)} MINUTE)"
+                f"INTERVAL {60 * (h - 1) + 1} MINUTE)"
             )
         cls._history_conditions = ',\n'.join(conditions)
 
@@ -55,8 +55,8 @@ class ClickhouseRepository(DriversRepository):
                 'SELECT'
                 '  driver,'
                 '  countIf(timestamp between '
-                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 59 MINUTE' 
-                '    and toStartOfFifteenMinutes(toDateTime(%(start)s))) as h '
+                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 60 MINUTE' 
+                '    and toStartOfFifteenMinutes(toDateTime(%(start)s)) - INTERVAL 1 MINUTE) as h '
                 'FROM drivers'
                 '  WHERE driver in %(drivers)s and state = %(state)s '
                 'GROUP BY driver'
@@ -71,14 +71,15 @@ class ClickhouseRepository(DriversRepository):
     def get_on_order(self,
                      drivers: Iterable[DriverID],
                      start: datetime, end: datetime) -> Mapping[DriverID, Iterable[Share]]:
-
         return self.make_dict(self._client.execute_iter(
             query=(
                 'SELECT'
                 '  driver,'
-                '  countIf(timestamp between '
-                '    toStartOfFifteenMinutes(toDateTime(%(start)s)) and '
-                '    toStartOfFifteenMinutes(toDateTime(%(end)s))) as duration '
+                '  countIf('
+                '    timestamp >= toStartOfFifteenMinutes(toDateTime(%(start)s))'
+                '      and '
+                '    timestamp < toStartOfFifteenMinutes(toDateTime(%(end)s))'
+                '  ) as duration '
                 'FROM drivers'
                 '  WHERE driver in %(drivers)s and state = %(state)s '
                 'GROUP BY driver'
