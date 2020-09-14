@@ -15,6 +15,7 @@ def get_rand_pair(secret: int) -> (int, int):
     :param secret: integer to be split into 2 shares
     :return: a pair of base's components
     """
+    assert secret < MODULO, f"{secret} > {MODULO}"
     share0 = randrange(MODULO)
     share1 = (secret - share0) % MODULO
     return share0, share1
