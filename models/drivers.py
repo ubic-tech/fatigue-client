@@ -5,19 +5,6 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
-class EndpointInfo(BaseModel):
-    id: UUID
-    endpoint: str
-
-
-class EndpointsBody(BaseModel):
-    identifiers: List[UUID]
-
-
-class EndpointResponse(BaseModel):
-    endpoints: List[EndpointInfo]
-
-
 class DriverShares(BaseModel):
     hash_id: str
     shares: List[int]

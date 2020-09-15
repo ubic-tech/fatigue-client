@@ -9,17 +9,21 @@ from routers import drivers, health
 from config import AggregatorConfig, PREFIX_URL
 
 
-#  uvicorn main:app  --port 8080
 app = FastAPI()
 
 
 @app.exception_handler(OperationError)
-async def attribute_exists(request, exc):
+async def operation_handler(request, exc):
     return JSONResponse({"error": str(exc)}, status_code=503)
 
 
 @app.exception_handler(StatusError)
-async def attribute_exists(request, exc):
+async def status_handler(request, exc):
+    return JSONResponse({"error": str(exc)}, status_code=503)
+
+
+@app.exception_handler(Exception)
+async def exception_handler(request, exc):
     return JSONResponse({"error": str(exc)}, status_code=503)
 
 

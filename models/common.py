@@ -1,4 +1,19 @@
 from pydantic import BaseModel
+from uuid import UUID
+from typing import List
+
+
+class EndpointInfo(BaseModel):
+    id: UUID
+    endpoint: str
+
+
+class EndpointsBody(BaseModel):
+    identifiers: List[UUID]
+
+
+class EndpointResponse(BaseModel):
+    endpoints: List[EndpointInfo]
 
 
 class StatusResponse(BaseModel):
