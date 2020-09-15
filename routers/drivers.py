@@ -19,10 +19,10 @@ db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL, AggrConf.AGGR_NAME)
 @cached(ttl=AggrConf.ENDPOINTS_TTL)
 async def get_endpoint_by_uuid(uuid: UUID) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
-    endpoints_request = drivers.EndpointsBody(identifiers=[uuid, ])
+    endpoints_request = common.EndpointsBody(identifiers=[uuid, ])
     resp = await request(route, data=endpoints_request.json())
     try:
-        return drivers.EndpointResponse(**resp).endpoints[0].endpoint
+        return common.EndpointResponse(**resp).endpoints[0].endpoint
     except (ValidationError, IndexError):
         raise OperationError
 
