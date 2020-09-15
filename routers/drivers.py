@@ -91,8 +91,7 @@ def get_hash_ids(drivers_shares: List[drivers.DriverShares]
 @router.post("/drivers/fatigue",
              response_model=common.StatusResponse,
              response_model_exclude_unset=True)
-def fatigue(raw_request: Request,
-            fatigue_drivers: drivers.FatigueBody):
+def fatigue(_: Request, __: drivers.FatigueBody):
     # handle fatigue_drivers here
     return common.SUCCESS
 
