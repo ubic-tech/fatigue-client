@@ -1,5 +1,6 @@
 venv
 __pycache__
+1000.csv
 .idea
 .hypothesis
 .venv/
