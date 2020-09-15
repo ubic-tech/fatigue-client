@@ -2,8 +2,8 @@ from copy import deepcopy
 from uuid import UUID
 
 from utils.utils import OperationError
-from routers.drivers import get_next_endpoint_uuid
-
+from routers.drivers import (check_if_mine_uuid_1st_and_pop,
+                             get_next_endpoint_uuid)
 
 MY_UUID_STR = "8704d129-1af0-489e-b761-d40344c12e70"
 MY_UUID = UUID(MY_UUID_STR)
@@ -28,11 +28,12 @@ def test_positive():
         ],
     ]
     for i, s in enumerate(deepcopy(sets)):
-        assert get_next_endpoint_uuid(s, MY_UUID_STR) == str(NEXT_UUID)
+        check_if_mine_uuid_1st_and_pop(s, MY_UUID)
+        assert get_next_endpoint_uuid(s) == NEXT_UUID
         assert s == sets[i][1:]  # test popping
 
 
-def test_not_found():
+def test_not_mine():
     sets = [
         [],
         [UUID("87a4d1b9-1afc-4d9e-b161-d20445c16e70"), ],
@@ -44,13 +45,13 @@ def test_not_found():
     ]
     for s in sets:
         try:
-            get_next_endpoint_uuid(s, MY_UUID_STR)
-            assert False
+            check_if_mine_uuid_1st_and_pop(s, MY_UUID)
         except OperationError:
-            assert True
+            continue
+        assert False
 
 
-def test_last():
-    chain = [MY_UUID, ]
-    assert get_next_endpoint_uuid(chain, MY_UUID_STR) is None
+def test_next_from_empty():
+    chain = []
+    assert get_next_endpoint_uuid(chain) is None
     assert chain == []
