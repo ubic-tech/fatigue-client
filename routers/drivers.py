@@ -77,9 +77,9 @@ async def process(x_request_id, req_body, path, my_data):
 
         #  if next responded ok I can send my shares to Ubic and that is it for me
         shares_body = drivers.SharesBody(next=next_endpoint_uuid, drivers=for_ubic)
-        r = await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
-                          headers=headers,
-                          data=shares_body.json())
+        await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
+                      headers=headers,
+                      data=shares_body.json())
         return
 
 
