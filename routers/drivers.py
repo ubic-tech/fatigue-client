@@ -13,8 +13,7 @@ from core.mpc import continue_mpc, finalize_mpc
 from config import AggregatorConfig as AggrConf
 
 router = APIRouter()
-db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL,
-                          AggrConf.AGGR_NAME)
+db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL, AggrConf.AGGR_NAME)
 
 
 @cached(ttl=AggrConf.ENDPOINTS_TTL)
