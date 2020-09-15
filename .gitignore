@@ -4,6 +4,7 @@ __pycache__
 .idea
 .hypothesis
 .venv/
+*.swp
 aggregator.srctrlbm
 aggregator.srctrldb
 aggregator.srctrlprj
