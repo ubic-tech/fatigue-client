@@ -1,0 +1,360 @@
+openapi: 3.0.0
+info:
+    description: Endpoints операторов Такси.
+    title: Taxi Aggregator Service
+    version: '1.0'
+
+paths:
+    /v1/health:
+        get:
+            summary: Health-Check
+            description: Метод, вызовом которого контролируется доступность сервисов операторов Такси. Предоставляется каждым оператором.
+            responses:
+                200:
+                    description: Сервис доступен. 
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+                503:
+                    description: Сервис недоступен.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+
+    /v1/drivers/fatigue:
+        post:
+            summary: Оповещение об усталости подмножества водителей.
+            description: |
+                  Посредством этого метода UBIC передает операторам время на линии и время на заказе для каждого 
+                  водителя из заданного подможества. Предполагается, что в рамках пилота данный метод будет вызываться 
+                  всякий раз, когда соответствующий лимит одного из операторов будет превышен. Например, предположим,
+
+                  * Лимиты Яндекса: 17 часов на линии, 7 часов на заказах
+                  * Лимиты Сити: 15 часов на линии, 8 часов на заказах
+                  * Вне зависимости от оператора водителю неодходимо 7 полных часов случайных   
+
+                  Предположим также, что водитель 42 в данный час 15 часов на линии и 6 часов на заказах, – UBIC вызывает 
+                  __/v1/drivers/fatigue__, указывая _online=15_ и _on_order=360_, и продолжает отслеживать водителя (технически
+                  он уже заблокирован в Сити). Далее предположим, что следующий час у водителя накопилось 16 часов на линии и 
+                  7 на заказах, UBIC снова вызывает __/v1/drivers/fatigue__ с _online=15_ и _on_order=420_ (теперь водитель 
+                  заблокирован и в Яндекс).
+
+                  У такого метода есть недостаток: водитель, заблокированый у одного оператора, продолжает некоторое время 
+                  работать у другого, и это _некоторое время_ – зона раскрытия лишней/вредной информации. Решения:
+
+                  * Договориться об одинаковых лимитах
+                  * Игнорировать этот недостаток, пока лимиты не установит регулятор
+                    
+            parameters:
+              - in: header
+                name: 'X-Request-Id'
+                schema:
+                  type: string
+                required: true
+                description: UUID запроса (транзакции) – одного цикла вычислений.
+            requestBody:
+                required: true
+                description: Иформация по водителям.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FatigueBody'
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+                503:
+                    description: Что-то пошло не так.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+
+    /v1/drivers/online/hourly:
+        post:
+            summary: Отслеживание состояния на линии для группы водителей.
+            description: |
+                __UBIC__ раз в N единиц времени: 
+
+                * Группирует водителей (с гранулярностью в 15 минут), для которых в данный момент необходимо уточнить состояние  
+                * Составляет список "доступных" опетаторов Такси
+                * Случайно перемешивает список операторов
+                * Выбирает первого оператора из списка
+                * Вызывает __/v1/drivers/online/hourly__ для этого оператора, передавая ему список водителей
+                
+                __Оператор__, получив вызов:
+
+                * На основании внутренних данных для каждого водителя из списка в параметрах вызова формирует вектор из 0 и 1, где
+                  * 0 – у данного водителя не было ни одного заказа за час, предшествующий вызову
+                  * 1 – у данного водителя был хотя бы 1 заказ за час, предшествующий вызову
+                * Выбирает следующего оператора из списка, полученного в параметрах запроса
+                  * Если список не пуст:
+                    * Разделяет секреты, представляя каждый 1 и 0 в массиве в виде суммы двух случайных чисел
+                    * Складывает первую часть секретов с долями секретов (числами), полученными в параметрах вызова
+                    * Вызывает __/v1/drivers/online/hourly__ этого оператора и передает ему полученную сумму секретов и список оставшихся в списке операторов
+                    * Вторую половину секретов оператор передает в UBIC, вызывая __/v1/shares__
+                  * Если список пуст (текущий оператор – последний в цикле):
+                    * Складывает свои 0 и 1 с суммами секретов, полученными от предыдущего оператора в параметрах вызова
+                    * Передает рассчитанные суммы в UBIC
+            parameters:
+              - in: header
+                name: 'X-Request-Id'
+                schema:
+                  type: string
+                required: true
+                description: UUID запроса (транзакции) – одного цикла вычислений.
+            requestBody:
+                required: true
+                description: Разделение секретов предыдущих операторов и список операторов, формирующий цикл вычислений. 
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ControlBody'
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+                503:
+                    description: Вычисление не может быть выполнено.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+
+    /v1/drivers/online/quarter_hourly:
+        post:
+            summary: Уточнение состояния "на линии" в рамках 15-ти минутных интервалов. 
+            description: |
+              UBIC вызывает данный метод для водителей, которые по результатам вызова __/v1/drivers/online/hourly__ изменили свое
+              состояние в час, предшествующий запросу – вышли на линию или наоборот покинули ее. Цель – уточнить время, в которое водитель
+              изменил состояние в 15-ти минутных интервалах в рамках часа, когда произошло изменение состояния. Час делится на 4
+              одинаковых интервала, каждый из которых кодируется 1, если у водителя в данный интервал был хотя бы один заказ, и 0 – иначе.
+              По результатам этого вызова UBIC меняет расписание вызовов __/v1/drivers/online/hourly__ для водителя таким образом, чтобы 
+              "не украсть" у него больше 15 минут в случае блокировки последнего.
+            
+              
+              Логика вызовов для MPC-сложения совпадает с логикой, описанной в __/v1/drivers/online/hourly__.
+            parameters:
+              - in: header
+                name: 'X-Request-Id'
+                description: UUID запроса (транзакции) – одного цикла вычислений.
+                schema:
+                  type: string
+                required: true
+            requestBody:
+                required: true
+                description: Разделение секретов предыдущих операторов и список операторов, формирующий цикл вычислений.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ControlBody'
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+                503:
+                    description: Вычисление не может быть выполнено.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+
+    /v1/drivers/online/history_hourly:
+        post:
+            summary: Разогрев при старте системы. 
+            description: |
+              UBIC вызывает данный метод для всех водителей один раз при старте системы. В ответ для каждого водителя ожидается
+              вектор из 24 нулей и/или единиц, представляющий почасовое состояние водителя за сутки от момента вызова. Основываясь на
+              этой информации, UBIC определяет: 
+              
+              * моменты полного восстановления водителей (и, соответственно, выхода на линию)
+              * моменты, в которые водитель покинул линию (длящийся отдых)
+              * водителей, которые находятся на линии слишком долго (за сутки нет ни одной непрерывной последовательности нулей) 
+              
+              Далее UBIC производит предварительную группировку водителей (вышли на/покинули линию c 11:00 до 12:00, 
+              c 12:00 до 13:00 и т.д) и для групп водителей выполняет уточняющие запросы __/v1/drivers/online/quarter_hourly__, 
+              указывая в параметре __timestamp__ час, в который данная группа водителей изменила свое состояние. Таким образом,
+              водители перегруппируются, для гурпп составляется расписание с гранулярностью 15 минут, и дальнейшие вызовы API 
+              производятся согласно принятому протоколу.       
+            
+              Логика вызовов для MPC-сложения совпадает с логикой, описанной в __/v1/drivers/online/hourly__.
+            parameters:
+              - in: header
+                name: 'X-Request-Id'
+                description: UUID запроса (транзакции) – одного цикла вычислений.
+                schema:
+                  type: string
+                required: true
+            requestBody:
+                required: true
+                description: Разделение секретов предыдущих операторов и список операторов, формирующий цикл вычислений.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ControlBody'
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+                503:
+                    description: Вычисление не может быть выполнено.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+
+    /v1/drivers/on_order:
+        post:
+            summary: Контроль времени на заказе.
+            description: |
+              UBIC планирует вызов этого метода через N (N – установленный для водителя лимит времени на заказах) часов от момента полного
+              отдыха водителя. Цель – установить, сколько времени водитель провел на заказах у всех операторов Такси и проверить, не
+              превышено ли ограничение. Результат возвращается в минутах. Допустим, в результате вызова и спровоцированных вычислений, получен 
+              результат: K минут. Тогда следующий вызов для этого водителя (если водитель не будет заблокирован по результатам текущего вызова) 
+              будет запланирован через N - round(K) часов, где round(K) – полное число часов в K минутах.  
+          
+              Логика вызовов для MPC-сложения совпадает с логикой, описанной в __/v1/drivers/online/hourly__.
+            parameters:
+              - in: header
+                name: 'X-Request-Id'
+                schema:
+                  type: string
+                required: true
+                description: UUID запроса (транзакции) – одного цикла вычислений.
+            requestBody:
+                required: true
+                description: Разделение секретов предыдущих операторов и список операторов, формирующий цикл вычислений.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ControlBody'
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+                503:
+                    description: Вычисление не может быть выполнено.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatusResponse'
+
+components:
+    schemas:
+        StatusResponse:
+            type: object
+            properties:
+                code:
+                    description: Код ошибки в машиночитаемом формате.
+                    type: string
+                message:
+                    description: Человекочитаемое сообщение об ошибке.
+                    type: string
+            required:
+              - code
+              - message
+
+        FatigueBody:
+            type: object
+            description: Информация об усталости группы водителей. 
+            properties:
+                timestamp:
+                    description: timestamp, от которого отсчитываются соответствующие времена на линиии и на заказе.
+                    type: string
+                    format: date-time
+                drivers:
+                    type: array
+                    description: Массив объектов DriverFatigue, каждый из которых содержит время на линии/заказе для конкретного водителя.
+                    items:
+                        $ref: '#/components/schemas/DriverFatigue'
+            required:
+              - timestamp
+              - drivers
+
+        DriverFatigue:
+            type: object
+            properties:
+                hash_id:
+                    description: sha256(номер ВУ + Фамилия водителя) 
+                    type: string
+                online:
+                    description: Время на линии в часах.
+                    type: integer
+                on_order:
+                    description: Время на заказе в минутах.
+                    type: integer
+            required:
+              - hash_id
+              - online
+              - on_order
+
+        ControlBody:
+            type: object
+            description: Информация, необходимая для MPC-сложения. 
+            properties:
+                start:
+                    description: timestamp, которым начинается временное окно запроса.
+                    type: string
+                    format: date-time
+                end: 
+                    description: |
+                        timestamp, которым заканчивается временное окно запроса. Указывается, 
+                        если размер окна не определен семантикой запроса. Например, в случае 
+                        __/v1/drivers/on_order__.
+                drivers:
+                    type: array
+                    description: Массив разделений секретов водителей.
+                    items:
+                        $ref: '#/components/schemas/DriverShares'
+                chain:
+                    description: Массив идентификаторов операторов Такси, формирующий цикл вычислений. 
+                    type: array
+                    items:
+                        type: string
+                        format: uuid
+            required:
+              - start
+              - drivers
+              
+
+
+        DriverShares:
+            type: object
+            description: Разделение секрета водителя. 
+            properties:
+                hash_id:
+                    description: sha256(номер ВУ + Фамилия водителя).
+                    type: string
+                shares:
+                    type: array
+                    description: |
+                      Массив долей секретов водителя. Может состоять из одного числа (доли одного секрета) в случае вызовов __/v1/driver
+                      /online/hourly__ и и __/v1/drivers/on_order__, четырех чисел (долей четырех секретов) в случае вызова 
+                      __/v1/drivers/online/quarter_hourly__ и двадцвати трех чисел в случае вызова __/v1/drivers/online/history_hourly__
+                    items:
+                        type: integer
+                        minItems: 1
+                        maxItems: 4
+            required:
+              - hash_id
+              - shares
+          
+            
+    
