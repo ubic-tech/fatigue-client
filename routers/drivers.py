@@ -52,7 +52,8 @@ async def process(x_request_id, req_body, path, my_data):
     """
     headers = {"X-Request-Id": x_request_id, }
     # if no next endpoint simply send 'my' data += ctrl_body's to Ubic
-    if not (next_endpoint_uuid := get_next_endpoint_uuid(req_body.chain)):
+    next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain)
+    if not next_endpoint_uuid:
         for_ubic = finalize_mpc(req_body.drivers, my_data)
         shares_body = drivers.SharesBody(drivers=for_ubic)
         await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
