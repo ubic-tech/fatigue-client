@@ -1,12 +1,8 @@
-version: "3.8"
+version: "3"
 
 services:
   db:
      image: yandex/clickhouse-server
-     ports:
-       - "8123:8123"
-       - "9000:9000"
-       - "9009:9009"
      ulimits:
       nproc: 65535
       nofile:
@@ -15,31 +11,29 @@ services:
 
   yandex:
     build: .
-    ports:
-      - "9091:9090"
     environment:
-      CLICK_HOUSE_URL: "db"
-      UBIC_URL: "http://host.docker.internal:8888"
+      UBIC_URL: "http://ubic-mock:8888"
+      CLICKHOUSE_URL: "db"
       AGGR_NAME: "Yandex"
       AGGR_UUID: "777aaaaa-1af0-489e-b761-d40344c12e70"
       
   city:
     build: .
-    ports:
-      - "9092:9090"
     environment:
-      CLICK_HOUSE_URL: "db"
-      UBIC_URL: "http://host.docker.internal:8888"
+      UBIC_URL: "http://ubic-mock:8888"
+      CLICKHOUSE_URL: "db"
       AGGR_NAME: "City"
       AGGR_UUID: "888aaaaa-1af0-489e-b761-d40344c12e70"
   
   gett:
     build: .
-    ports:
-      - "9093:9090"
     environment:
-      CLICK_HOUSE_URL: "db"
-      UBIC_URL: "http://host.docker.internal:8888"
+      UBIC_URL: "http://ubic-mock:8888"
+      CLICKHOUSE_URL: "db"
       AGGR_NAME: "Gett"
       AGGR_UUID: "999aaaaa-1af0-489e-b761-d40344c12e70"
 
+networks:
+  default:
+    external:
+      name: taxi-net

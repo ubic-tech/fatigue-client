@@ -36,7 +36,7 @@ async def init_app():
     seed(datetime.now().microsecond)
     print(AggregatorConfig.AGGR_NAME, " started, uuid == ",
           AggregatorConfig.AGGR_UUID,
-          " CH_URL: ", AggregatorConfig.CLICK_HOUSE_URL)
+          " CH_URL: ", AggregatorConfig.CLICKHOUSE_URL)
 
 
 @app.on_event("shutdown")

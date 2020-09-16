@@ -13,10 +13,10 @@ from core.mpc import continue_mpc, finalize_mpc
 from config import AggregatorConfig as AggrConf
 
 router = APIRouter()
-db = ClickhouseRepository(AggrConf.CLICK_HOUSE_URL, AggrConf.AGGR_NAME)
+db = ClickhouseRepository(AggrConf.CLICKHOUSE_URL, AggrConf.AGGR_NAME)
 
 
-@cached(ttl=AggrConf.ENDPOINTS_TTL)
+@cached(ttl=AggrConf.ENDPOINTS_CACHE_TTL)
 async def get_endpoint_by_uuid(uuid: UUID) -> str:
     route = AggrConf.UBIC_URL + AggrConf.ENDPOINTS_ROUTE
     endpoints_request = common.EndpointsBody(identifiers=[uuid, ])
