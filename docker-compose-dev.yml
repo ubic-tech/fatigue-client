@@ -18,7 +18,7 @@ services:
     ports:
       - "9091:9090"
     environment:
-      CLICK_HOUSE_URL: "db"
+      CLICKHOUSE_URL: "db"
       UBIC_URL: "http://host.docker.internal:8888"
       AGGR_NAME: "Yandex"
       AGGR_UUID: "777aaaaa-1af0-489e-b761-d40344c12e70"
@@ -28,7 +28,7 @@ services:
     ports:
       - "9092:9090"
     environment:
-      CLICK_HOUSE_URL: "db"
+      CLICKHOUSE_URL: "db"
       UBIC_URL: "http://host.docker.internal:8888"
       AGGR_NAME: "City"
       AGGR_UUID: "888aaaaa-1af0-489e-b761-d40344c12e70"
@@ -38,7 +38,7 @@ services:
     ports:
       - "9093:9090"
     environment:
-      CLICK_HOUSE_URL: "db"
+      CLICKHOUSE_URL: "db"
       UBIC_URL: "http://host.docker.internal:8888"
       AGGR_NAME: "Gett"
       AGGR_UUID: "999aaaaa-1af0-489e-b761-d40344c12e70"
