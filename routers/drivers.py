@@ -3,12 +3,12 @@ from uuid import UUID
 from fastapi import Header, APIRouter, Request, BackgroundTasks
 from pydantic.error_wrappers import ValidationError
 from aiocache import cached
-from typing import Iterable, List
+from typing import Iterable, List, Mapping
 
 from utils.utils import request, OperationError
 from models import drivers, common
 from repository.clickhouse_repository import ClickhouseRepository
-from repository.drivers_repository import DriverID
+from repository.drivers_repository import DriverID, Share
 from core.mpc import continue_mpc, finalize_mpc
 from config import AggregatorConfig as AggrConf
 
@@ -41,7 +41,10 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID]):
         return None
 
 
-async def process(x_request_id, req_body, path, my_data):
+async def process(x_request_id: str,
+                  req_body: drivers.ControlBody,
+                  path: str,
+                  my_data: Mapping[DriverID, Iterable[Share]]):
     """
     organizes strategy of MPC and web request forwarding
     :param x_request_id: header from request to be forwarded
