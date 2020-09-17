@@ -41,6 +41,16 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID]):
         return None
 
 
+def all_zeros(drivers_shares: List[drivers.DriverShares]) -> bool:
+    try:  # all shares are guaranteed to be equally-sized
+        shares_count = len(drivers_shares[0].shares)
+    except IndexError:  # not empty lists are not guaranteed
+        return True
+
+    zero_shares = [0 for _ in range(shares_count)]
+    return all(d.shares == zero_shares for d in drivers_shares)
+
+
 async def process(x_request_id: str,
                   req_body: drivers.ControlBody,
                   path: str,
@@ -60,6 +70,9 @@ async def process(x_request_id: str,
     # if no next endpoint simply send 'my' data += ctrl_body's to Ubic
     next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain)
     if not next_endpoint_uuid:
+        #  can't send my shares if 'I' am the finalizer and all shares for all drivers are zero
+        if check_no_zeros and all_zeros(req_body.drivers):
+            return
         for_ubic = finalize_mpc(req_body.drivers, my_data)
         shares_body = drivers.SharesBody(drivers=for_ubic)
         await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
@@ -117,8 +130,8 @@ async def online_hourly(raw_request: Request,
                               raw_request.url.path,
                               db.get_hourly(
                                   get_hash_ids(ctrl_body.drivers),
-                                  ctrl_body.start)
-                              )
+                                  ctrl_body.start),
+                              True)
     return common.SUCCESS
 
 
@@ -136,8 +149,8 @@ async def history_hourly(raw_request: Request,
                               raw_request.url.path,
                               db.get_history_hourly(
                                   get_hash_ids(ctrl_body.drivers),
-                                  ctrl_body.start)
-                              )
+                                  ctrl_body.start),
+                              True)
     return common.SUCCESS
 
 
@@ -155,8 +168,8 @@ async def online_quarter_hourly(raw_request: Request,
                               raw_request.url.path,
                               db.get_quarter_hourly(
                                   get_hash_ids(ctrl_body.drivers),
-                                  ctrl_body.start)
-                              )
+                                  ctrl_body.start),
+                              True)
     return common.SUCCESS
 
 
