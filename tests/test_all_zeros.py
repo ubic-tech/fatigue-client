@@ -1,5 +1,5 @@
 from models.drivers import DriverShares
-from routers.drivers import all_zeros
+from routers.drivers import all_zeroes
 
 
 drivers_ok = [
@@ -42,8 +42,8 @@ drivers_empty = []
 
 
 def test_check_all_zeros():
-    assert not all_zeros(drivers_ok)
-    assert not all_zeros(drivers_ok_many)
-    assert all_zeros(drivers_all_zeros)
-    assert all_zeros(drivers_zeros_many)
-    assert all_zeros(drivers_empty)
+    assert not all_zeroes(drivers_ok)
+    assert not all_zeroes(drivers_ok_many)
+    assert all_zeroes(drivers_all_zeros)
+    assert all_zeroes(drivers_zeros_many)
+    assert all_zeroes(drivers_empty)
