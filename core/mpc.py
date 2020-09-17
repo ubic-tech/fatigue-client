@@ -1,6 +1,6 @@
 from random import randrange
 
-from typing import List, Mapping
+from typing import List, Iterable, Mapping
 
 from repository.drivers_repository import DriverID, Share
 from models.drivers import DriverShares
@@ -23,8 +23,8 @@ def get_rand_pair(secret: int) -> (int, int):
 
 def continue_mpc(
         drivers: List[DriverShares],
-        my_data: Mapping[DriverID, List[Share]]
-) -> (List[DriverShares], List[DriverShares]):
+        my_data: Mapping[DriverID, Iterable[Share]]
+) -> (List[DriverShares], Iterable[DriverShares]):
     """
      adds one random number to each of request's shares and
         one for each hash_id pushes into a returned list
@@ -51,7 +51,7 @@ def continue_mpc(
 
 def finalize_mpc(
         drivers: List[DriverShares],
-        my_data: Mapping[DriverID, List[Share]]
+        my_data: Mapping[DriverID, Iterable[Share]]
 ) -> List[DriverShares]:
     """
     adds my_data's shares to request_drivers' shares for each hash_id

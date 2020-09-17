@@ -44,7 +44,8 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID]):
 async def process(x_request_id: str,
                   req_body: drivers.ControlBody,
                   path: str,
-                  my_data: Mapping[DriverID, Iterable[Share]]):
+                  my_data: Mapping[DriverID, Iterable[Share]],
+                  check_no_zeros: bool = False):
     """
     organizes strategy of MPC and web request forwarding
     :param x_request_id: header from request to be forwarded
@@ -52,6 +53,8 @@ async def process(x_request_id: str,
     :param path: url specifying the MPC destination
     :param my_data: data extraction method appropriate for
         current MPC destination
+    :param check_no_zeros: if true and finalizing MPC
+        validate not all values are zero in shares
     """
     headers = {"X-Request-Id": x_request_id, }
     # if no next endpoint simply send 'my' data += ctrl_body's to Ubic
