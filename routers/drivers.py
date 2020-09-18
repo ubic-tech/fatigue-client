@@ -42,13 +42,13 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID]):
 
 
 def all_zeroes(drivers_shares: List[drivers.DriverShares]) -> bool:
-    try:  # all shares are guaranteed to be equally-sized
-        shares_count = len(drivers_shares[0].shares)
-    except IndexError:  # not empty lists are not guaranteed
-        return True
+    total = 0
+    for d in drivers_shares:
+        total += sum(d.shares)
+        if total != 0:  # early return
+            return False
 
-    zero_shares = [0 for _ in range(shares_count)]
-    return all(d.shares == zero_shares for d in drivers_shares)
+    return total == 0
 
 
 async def process(x_request_id: str,
