@@ -1,13 +1,9 @@
 from random import randrange
-
 from typing import List, Mapping
 
 from repository.drivers_repository import DriverID, Share
 from models.drivers import DriverShares
-
-
-MODULO = 999983
-
+from config import AggregatorConfig
 
 def get_rand_pair(secret: int) -> (int, int):
     """
@@ -15,9 +11,9 @@ def get_rand_pair(secret: int) -> (int, int):
     :param secret: integer to be split into 2 shares
     :return: a pair of base's components
     """
-    assert secret < MODULO, f"{secret} > {MODULO}"
-    share0 = randrange(MODULO)
-    share1 = (secret - share0) % MODULO
+    assert secret < AggregatorConfig.MODULO, f"{secret} > {AggregatorConfig.MODULO}"
+    share0 = randrange(AggregatorConfig.MODULO)
+    share1 = (secret - share0) % AggregatorConfig.MODULO
     return share0, share1
 
 

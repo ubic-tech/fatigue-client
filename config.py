@@ -12,3 +12,4 @@ class AggregatorConfig:
     AGGR_NAME: str = "Yandex"
     AGGR_UUID: str = "777aaaaa-1af0-489e-b761-d40344c12e70"
     CLICKHOUSE_URL: str = "None"
+    MODULO: int = 999983
