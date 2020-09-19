@@ -1,84 +1,134 @@
-from random import randint, seed
-from datetime import datetime
-
 from hypothesis import given, strategies as st
-from typing import List, Dict, Iterable
+from typing import Tuple, List, Dict, Iterable, Mapping
 
 from core.mpc import continue_mpc, finalize_mpc
 from models.drivers import DriverShares
-from core.mpc import MODULO
+from repository.drivers_repository import DriverID, Share
+from config import AggregatorConfig
 
 
-def setup_module(_):
-    seed(datetime.now().microsecond)
+HOURLY = 1
+QUARTER_HOURLY = 4
+HISTORY_HOURLY = 24
 
 
-def get_request_data(
-        hash_ids: Iterable[str],
-        shares_count: int
-) -> List[DriverShares]:
-    return [
-        DriverShares(hash_id=h, shares=[
-            randint(-1000, 1000) for _ in range(shares_count)
-        ]) for h in hash_ids
+def continue_mpc_validator(request_data: List[DriverShares],
+                           my_data: Mapping[DriverID, Iterable[Share]]):
+    for_ubic, for_next_aggr = continue_mpc(request_data, my_data)
+
+    assert (
+        len(for_ubic) ==
+        len(for_next_aggr) ==
+        len(request_data) ==
+        len(my_data)
+    )
+
+    for x in range(len(for_ubic)):
+        driver_id = for_ubic[x].hash_id
+        ubic_shares = for_ubic[x].shares
+        next_aggr_shares = for_next_aggr[x].shares
+        request_shares = request_data[x].shares
+        real_data = list(my_data[driver_id])
+        assert(
+            len(ubic_shares) ==
+            len(next_aggr_shares) ==
+            len(request_shares) ==
+            len(real_data)
+        )
+
+        for y in range(len(real_data)):
+            target = ((ubic_shares[y] + next_aggr_shares[y]) -
+                      request_shares[y]) % AggregatorConfig.MODULO
+            assert real_data[y] == target
+
+
+def finalize_mpc_validator(request_data: List[DriverShares],
+                           my_data: Mapping[DriverID, Iterable[Share]]):
+    for_ubic = finalize_mpc(request_data, my_data)
+
+    assert (
+        len(for_ubic) ==
+        len(request_data) ==
+        len(my_data)
+    )
+
+    for x in range(len(for_ubic)):
+        driver_id = for_ubic[x].hash_id
+        ubic_shares = for_ubic[x].shares
+        request_shares = request_data[x].shares
+        real_data = list(my_data[driver_id])
+        assert (
+                len(ubic_shares) ==
+                len(request_shares) ==
+                len(real_data)
+        )
+
+        for y in range(len(real_data)):
+            target = (ubic_shares[y] - request_shares[y]) % \
+                     AggregatorConfig.MODULO
+            assert real_data[y] == target
+
+
+def compute(data: Dict[str, Tuple[List[int], List[int]]]):
+    my_data = {str(k): v[0] for k, v in data.items()}
+
+    request_data = [
+        DriverShares(hash_id=str(k), shares=v[1]) for k, v in data.items()
     ]
 
-
-def continue_mpc_validator(request_data, my_data, shares_count):
-    for_ubic, for_next_aggr = continue_mpc(request_data, my_data)
-    print("*****request_data: ", request_data)
-    print("*****my_data: ", my_data)
-    print("*****for_ubic: ", for_ubic)
-    print("*****for_next_aggr: ", for_next_aggr)
-
-    assert len(for_ubic) == len(for_next_aggr)
-
-    for r, a, u in zip(request_data, for_next_aggr, for_ubic):
-        assert a.hash_id == u.hash_id == r.hash_id
-        assert len(a.shares) == len(u.shares) == len(r.shares) == shares_count
-        hash_id = a.hash_id
-        db_shares = my_data[hash_id]
-        assert shares_count == len(db_shares)
-        for i in range(shares_count):
-            web_part = u.shares[i] + a.shares[i]
-            db_part = r.shares[i] + db_shares[i]
-            print(u.shares[i], a.shares[i], "==", r.shares[i], db_shares[i], "\n\n")
-            assert web_part % MODULO == db_part % MODULO
+    continue_mpc_validator(request_data, my_data)
+    finalize_mpc_validator(request_data, my_data)
 
 
-def finalize_mpc_validator(request_data, my_data, shares_count):
-    for_next_aggr = finalize_mpc(request_data, my_data)
-    for r, a in zip(request_data, for_next_aggr):
-        assert r.hash_id == a.hash_id
-        hash_id = r.hash_id
-        db_shares = my_data[hash_id]
-        assert len(db_shares) == len(r.shares) == len(a.shares) == shares_count
-        for i in range(shares_count):
-            assert (db_shares[i] + r.shares[i]) % MODULO == a.shares[i] % MODULO
+@given(st.dictionaries(
+    st.uuids(),
+    st.tuples(
+        st.lists(
+            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            min_size=HOURLY, max_size=HOURLY
+        ),
+        st.lists(
+            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            min_size=HOURLY, max_size=HOURLY
+        ),
+    ),
+    min_size=1
+))
+def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
+    compute(data)
 
 
-def compute(data: Dict[str, List[int]], shares_count: int):
-    data = {str(k): v for k, v in data.items()}
-    request_data = get_request_data(data.keys(), shares_count)
-    continue_mpc_validator(request_data, data, shares_count)
-    finalize_mpc_validator(request_data, data, shares_count)
+@given(st.dictionaries(
+    st.uuids(),
+    st.tuples(
+        st.lists(
+            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            min_size=QUARTER_HOURLY, max_size=QUARTER_HOURLY
+        ),
+        st.lists(
+            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            min_size=QUARTER_HOURLY, max_size=QUARTER_HOURLY
+        ),
+    ),
+    min_size=1
+))
+def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
+    compute(data)
 
 
-@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=0, max_size=0)))
-def test_0_share(data: Dict[str, List[int]]):
-    compute(data, 0)
-
-
-@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=1, max_size=1)))
-def test_1_share(data: Dict[str, List[int]]):
-    compute(data, 1)
-
-
-@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=4, max_size=4)))
-def test_4_shares(data: Dict[str, List[int]]):
-    compute(data, 4)
-
-
-@given(st.dictionaries(st.uuids(), st.lists(st.integers(), min_size=24, max_size=24)))
-def test_24_shares(data: Dict[str, List[int]]):
-    compute(data, 24)
+@given(st.dictionaries(
+    st.uuids(),
+    st.tuples(
+        st.lists(
+            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            min_size=HISTORY_HOURLY, max_size=HISTORY_HOURLY
+        ),
+        st.lists(
+            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            min_size=HISTORY_HOURLY, max_size=HISTORY_HOURLY
+        ),
+    ),
+    min_size=1
+))
+def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
+    compute(data)

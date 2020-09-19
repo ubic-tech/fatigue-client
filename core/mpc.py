@@ -9,7 +9,7 @@ from config import AggregatorConfig
 
 def get_rand_pair(secret: int) -> (int, int):
     """
-    return a pair of random integers so that their sum == secret
+    return a pair of random integers so that their sum % MODULO == secret
     :param secret: integer to be split into 2 shares
     :return: a pair of base's components
     """
@@ -35,16 +35,18 @@ def continue_mpc(
     ubic_drivers_shares = []
     next_aggr_drivers_shares = []
 
-    for i, driver in enumerate(drivers):
-        my_shares = my_data[driver.hash_id]  # no miss guarantee by caller
+    for driver in drivers:
+        my_secrets = my_data[driver.hash_id]  # no miss guarantee by caller
         ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=[])
         next_aggr_driver_data = DriverShares(hash_id=driver.hash_id, shares=[])
-        for j, share in enumerate(my_shares):
-            for_ubic, for_next_aggr = get_rand_pair(int(share))
+
+        for j, secret in enumerate(my_secrets):
+            for_ubic, for_next_aggr = get_rand_pair(int(secret))
             ubic_driver_data.shares.append(for_ubic)
-            next_aggr_driver_data.shares.append(drivers[i].shares[j] + for_next_aggr)
+            next_aggr_driver_data.shares.append(driver.shares[j] + for_next_aggr)
         ubic_drivers_shares.append(ubic_driver_data)
         next_aggr_drivers_shares.append(next_aggr_driver_data)
+
     return ubic_drivers_shares, next_aggr_drivers_shares
 
 
@@ -62,9 +64,13 @@ def finalize_mpc(
     """
     ubic_drivers_shares = []
 
-    # sum up 'my' shares with received ones
-    for i, driver in enumerate(drivers):
-        my_shares = my_data[driver.hash_id]  # no miss guarantee by caller
-        ubic_shares = [driver.shares[j] + share for j, share in enumerate(my_shares)]
-        ubic_drivers_shares.append(DriverShares(hash_id=driver.hash_id, shares=ubic_shares))
+    # sum up my shares with received ones
+    for driver in drivers:
+        my_secrets = my_data[driver.hash_id]  # no miss guarantee by caller
+        ubic_shares = [
+            driver.shares[j] + share for j, share in enumerate(my_secrets)
+        ]
+        ubic_drivers_shares.append(
+            DriverShares(hash_id=driver.hash_id, shares=ubic_shares)
+        )
     return ubic_drivers_shares
