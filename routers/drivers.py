@@ -3,12 +3,12 @@ from uuid import UUID
 from fastapi import Header, APIRouter, Request, BackgroundTasks
 from pydantic.error_wrappers import ValidationError
 from aiocache import cached
-from typing import Iterable, List
+from typing import Iterable, List, Mapping
 
 from utils.utils import request, OperationError
 from models import drivers, common
 from repository.clickhouse_repository import ClickhouseRepository
-from repository.drivers_repository import DriverID
+from repository.drivers_repository import DriverID, Share
 from core.mpc import continue_mpc, finalize_mpc
 from config import AggregatorConfig as AggrConf
 
@@ -41,7 +41,21 @@ def get_next_endpoint_uuid(chain: drivers.List[UUID]):
         return None
 
 
-async def process(x_request_id, req_body, path, my_data):
+def all_zeroes(drivers_shares: List[drivers.DriverShares]) -> bool:
+    total = 0
+    for d in drivers_shares:
+        total += sum(d.shares)
+        if total != 0:  # early return
+            return False
+
+    return total == 0
+
+
+async def process(x_request_id: str,
+                  req_body: drivers.ControlBody,
+                  path: str,
+                  my_data: Mapping[DriverID, Iterable[Share]],
+                  check_no_zeros: bool = False):
     """
     organizes strategy of MPC and web request forwarding
     :param x_request_id: header from request to be forwarded
@@ -49,11 +63,16 @@ async def process(x_request_id, req_body, path, my_data):
     :param path: url specifying the MPC destination
     :param my_data: data extraction method appropriate for
         current MPC destination
+    :param check_no_zeros: if true and finalizing MPC
+        validate not all values are zero in shares
     """
     headers = {"X-Request-Id": x_request_id, }
     # if no next endpoint simply send 'my' data += ctrl_body's to Ubic
     next_endpoint_uuid = get_next_endpoint_uuid(req_body.chain)
     if not next_endpoint_uuid:
+        #  can't send my shares if 'I' am the finalizer and all shares for all drivers are zero
+        if check_no_zeros and all_zeroes(req_body.drivers):
+            return
         for_ubic = finalize_mpc(req_body.drivers, my_data)
         shares_body = drivers.SharesBody(drivers=for_ubic)
         await request(AggrConf.UBIC_URL + AggrConf.SHARES_ROUTE,
@@ -111,8 +130,8 @@ async def online_hourly(raw_request: Request,
                               raw_request.url.path,
                               db.get_hourly(
                                   get_hash_ids(ctrl_body.drivers),
-                                  ctrl_body.start)
-                              )
+                                  ctrl_body.start),
+                              True)
     return common.SUCCESS
 
 
@@ -130,8 +149,8 @@ async def history_hourly(raw_request: Request,
                               raw_request.url.path,
                               db.get_history_hourly(
                                   get_hash_ids(ctrl_body.drivers),
-                                  ctrl_body.start)
-                              )
+                                  ctrl_body.start),
+                              True)
     return common.SUCCESS
 
 
@@ -149,8 +168,8 @@ async def online_quarter_hourly(raw_request: Request,
                               raw_request.url.path,
                               db.get_quarter_hourly(
                                   get_hash_ids(ctrl_body.drivers),
-                                  ctrl_body.start)
-                              )
+                                  ctrl_body.start),
+                              True)
     return common.SUCCESS
 
 

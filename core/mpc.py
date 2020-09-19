@@ -1,9 +1,11 @@
 from random import randrange
-from typing import List, Mapping
+
+from typing import List, Iterable, Mapping
 
 from repository.drivers_repository import DriverID, Share
 from models.drivers import DriverShares
 from config import AggregatorConfig
+
 
 def get_rand_pair(secret: int) -> (int, int):
     """
@@ -18,8 +20,8 @@ def get_rand_pair(secret: int) -> (int, int):
 
 
 def continue_mpc(
-        drivers: List[DriverShares],
-        my_data: Mapping[DriverID, List[Share]]
+        drivers: Iterable[DriverShares],
+        my_data: Mapping[DriverID, Iterable[Share]]
 ) -> (List[DriverShares], List[DriverShares]):
     """
      adds one random number to each of request's shares and
@@ -32,6 +34,7 @@ def continue_mpc(
     """
     ubic_drivers_shares = []
     next_aggr_drivers_shares = []
+
     for i, driver in enumerate(drivers):
         my_shares = my_data[driver.hash_id]  # no miss guarantee by caller
         ubic_driver_data = DriverShares(hash_id=driver.hash_id, shares=[])
@@ -47,7 +50,7 @@ def continue_mpc(
 
 def finalize_mpc(
         drivers: List[DriverShares],
-        my_data: Mapping[DriverID, List[Share]]
+        my_data: Mapping[DriverID, Iterable[Share]]
 ) -> List[DriverShares]:
     """
     adds my_data's shares to request_drivers' shares for each hash_id
@@ -58,7 +61,9 @@ def finalize_mpc(
         each share from request_drivers summed with those from my_data
     """
     ubic_drivers_shares = []
-    for i, driver in enumerate(drivers):  # sum up 'my' shares with received ones
+
+    # sum up 'my' shares with received ones
+    for i, driver in enumerate(drivers):
         my_shares = my_data[driver.hash_id]  # no miss guarantee by caller
         ubic_shares = [driver.shares[j] + share for j, share in enumerate(my_shares)]
         ubic_drivers_shares.append(DriverShares(hash_id=driver.hash_id, shares=ubic_shares))
