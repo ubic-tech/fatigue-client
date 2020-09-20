@@ -10,6 +10,7 @@ from config import AggregatorConfig
 HOURLY = 1
 QUARTER_HOURLY = 4
 HISTORY_HOURLY = 24
+MAX_RANDOM_VALUE = AggregatorConfig.MODULO - 1
 
 
 def continue_mpc_validator(request_data: List[DriverShares],
@@ -84,17 +85,17 @@ def compute(data: Dict[str, Tuple[List[int], List[int]]]):
     st.uuids(),
     st.tuples(
         st.lists(
-            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            st.integers(min_value=0, max_value=MAX_RANDOM_VALUE),
             min_size=HOURLY, max_size=HOURLY
         ),
         st.lists(
-            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            st.integers(min_value=0, max_value=MAX_RANDOM_VALUE),
             min_size=HOURLY, max_size=HOURLY
         ),
     ),
     min_size=1
 ))
-def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
+def test_1_share(data: Dict[str, Tuple[List[int], List[int]]]):
     compute(data)
 
 
@@ -102,17 +103,17 @@ def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
     st.uuids(),
     st.tuples(
         st.lists(
-            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            st.integers(min_value=0, max_value=MAX_RANDOM_VALUE),
             min_size=QUARTER_HOURLY, max_size=QUARTER_HOURLY
         ),
         st.lists(
-            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            st.integers(min_value=0, max_value=MAX_RANDOM_VALUE),
             min_size=QUARTER_HOURLY, max_size=QUARTER_HOURLY
         ),
     ),
     min_size=1
 ))
-def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
+def test_4_share(data: Dict[str, Tuple[List[int], List[int]]]):
     compute(data)
 
 
@@ -120,15 +121,15 @@ def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
     st.uuids(),
     st.tuples(
         st.lists(
-            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            st.integers(min_value=0, max_value=MAX_RANDOM_VALUE),
             min_size=HISTORY_HOURLY, max_size=HISTORY_HOURLY
         ),
         st.lists(
-            st.integers(min_value=0, max_value=AggregatorConfig.MODULO),
+            st.integers(min_value=0, max_value=MAX_RANDOM_VALUE),
             min_size=HISTORY_HOURLY, max_size=HISTORY_HOURLY
         ),
     ),
     min_size=1
 ))
-def test_0_share(data: Dict[str, Tuple[List[int], List[int]]]):
+def test_24_share(data: Dict[str, Tuple[List[int], List[int]]]):
     compute(data)
